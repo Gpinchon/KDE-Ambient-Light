@@ -4,7 +4,7 @@ It might not work on other laptops depending on your configuration. Please profi
 
 The max values for automatic brightness can be set using System Plasma's "Settings/Power Management". They're read from `~/.config/powermanagementprofilesrc`
 
-The config file used for this service is located in ~/.config/ambient-light
+The config file used for this service is located in `~/.config/ambient-light`
 If no config file is found the service generates it automatically using the default values.
 
 The default values for the config file are the following :
