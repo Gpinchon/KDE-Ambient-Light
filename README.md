@@ -26,8 +26,6 @@ BacklightMin    = 0.0
 //Backlight maximum value, can be overloaded by System Settings/Power Management values
 BacklightMax    = 1.0
 
-
-
 //Keyboard LED path, might vary depending on the configuration
 KeyboardLedPath  = /sys/class/leds/platform::kbd_backlight/
 //Leyboard LED update delay in milliseconds
