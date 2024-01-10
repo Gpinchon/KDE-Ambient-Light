@@ -1,0 +1,9 @@
+[Unit]
+Description=Automatically adjust screen-brightness
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ambient-light
+
+[Install]
+WantedBy=multi-user.target

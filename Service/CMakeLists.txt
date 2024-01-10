@@ -18,10 +18,10 @@ set(SERVICE_INCLUDE
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Conf.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Tools.hpp)
 
-add_executable(KDE-Ambient-Light-Service
+add_executable(ambient-light
   ${SERVICE_SRC} ${SERVICE_INCLUDE})
 
-target_include_directories(KDE-Ambient-Light-Service PUBLIC
+target_include_directories(ambient-light PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-target_link_libraries(KDE-Ambient-Light-Service
+target_link_libraries(ambient-light
   Config)

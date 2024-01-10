@@ -8,28 +8,6 @@
 #include <pwd.h>
 #include <unistd.h>
 
-/*
-Config keys :
-
-ConfUpdateDelay = 5000
-
-#backlight update delay in milliseconds
-BacklightPath   = /sys/class/backlight/*
-BacklightDelay  = 32
-BacklightMin    = 0.0
-BacklightMax    = 1.0
-
-SensorPath      = /sys/bus/iio/devices/iio:device0
-SensorDelay     = 500
-
-KeyboardLedPath  = /sys/class/leds/platform::kbd_backlight/
-KeyboardLedDelay = 1000
-KeyboardLedMin   = 0
-KeyboardLedMax   = 1
-
-MaxLuxBreakpoint = 1254.0
-*/
-
 constexpr auto DefaultConfUpdateDelay = 5000;
 
 constexpr auto DefaultBacklightPath = "/sys/class/backlight/*";
@@ -64,7 +42,7 @@ std::string GetHomeDir()
 
 std::filesystem::path GetConfigPath()
 {
-    return GetHomeDir() + "/.config/ambient-backlight";
+    return GetHomeDir() + "/.config/ambient-light";
 }
 
 std::string GetBatteryStatus()

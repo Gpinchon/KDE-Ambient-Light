@@ -1,0 +1,1 @@
+Those are the scripts to be packaged with the binary
