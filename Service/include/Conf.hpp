@@ -5,10 +5,7 @@
 
 struct Conf
 {
-    Conf()
-    {
-        Update();
-    }
+    Conf();
     void Update();
 
     int loopDelay = 0;

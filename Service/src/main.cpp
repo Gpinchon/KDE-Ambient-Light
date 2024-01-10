@@ -119,6 +119,7 @@ private:
 
 int main(int argc, char const *argv[])
 {
+    Log() << "Starting...\n";
     Sensor sensor;
     Backlight backlight;
     KeyboardLed keyboardLed;

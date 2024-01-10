@@ -30,8 +30,9 @@ std::string GetHomeDir()
     static std::string homeDir;
     if (!homeDir.empty())
         return homeDir;
+    Log() << "Getting home dir...\n";
     auto pw = getpwuid(getuid());
-    if (std::string(pw->pw_name) == "root")
+    if (pw->pw_name == nullptr || std::string(pw->pw_name) == "root")
     {
         Log() << "Running as root, figuring out sudoer\n";
         auto sudoer = getenv("SUDO_UID");
@@ -250,6 +251,12 @@ std::string GetKBLedPath()
     if (auto configPath = Config::Global().Get("KeyboardLedPath", std::string(DefaultKeyboardLedPath)); KeyboardLedPathValid(configPath))
         return configPath;
     return "";
+}
+
+Conf::Conf()
+{
+    Log() << "Creating Conf\n";
+    Update();
 }
 
 void Conf::Update()
