@@ -33,7 +33,7 @@ std::string GetHomeDir()
     auto pw = getpwuid(getuid());
     if (std::string(pw->pw_name) == "root")
     {
-        std::cout << "Running as root, figuring out sudoer\n";
+        Log() << "Running as root, figuring out sudoer\n";
         auto sudoer = getenv("SUDO_UID");
         pw = getpwuid(std::stoi(sudoer));
     }
@@ -60,7 +60,7 @@ float GetBacklightACMaxBrightness()
     auto cmdRet = exec("kreadconfig5 --file " + GetHomeDir() + "/.config/powermanagementprofilesrc --group AC --group BrightnessControl --key value --default 100");
     try
     {
-        std::cout << "Max BrightnessControl on AC set to " << cmdRet;
+        Log() << "Max BrightnessControl on AC set to " << cmdRet;
         return std::stof(cmdRet) / 100.f;
     }
     catch (std::invalid_argument &)
@@ -75,7 +75,7 @@ float GetBacklightBatteryMaxBrightness()
     auto cmdRet = exec("kreadconfig5 --file " + GetHomeDir() + "/.config/powermanagementprofilesrc --group Battery --group BrightnessControl --key value --default 100");
     try
     {
-        std::cout << "Max BrightnessControl on battery set to " << cmdRet;
+        Log() << "Max BrightnessControl on battery set to " << cmdRet;
         return std::stof(cmdRet) / 100.f;
     }
     catch (std::invalid_argument &)
@@ -89,7 +89,7 @@ float GetBacklightLowBatteryMaxBrightness()
     auto cmdRet = exec("kreadconfig5 --file " + GetHomeDir() + "/.config/powermanagementprofilesrc --group LowBattery --group BrightnessControl --key value --default 100");
     try
     {
-        std::cout << "Max BrightnessControl on low battery set to " << cmdRet;
+        Log() << "Max BrightnessControl on low battery set to " << cmdRet;
         return std::stof(cmdRet) / 100.f;
     }
     catch (std::invalid_argument &)
@@ -103,7 +103,7 @@ float GetKeyboardACMaxBrightness()
     auto cmdRet = exec("kreadconfig5 --file " + GetHomeDir() + "/.config/powermanagementprofilesrc --group AC --group KeyboardBrightnessControl --key value --default 100");
     try
     {
-        std::cout << "Max KeyboardBrightnessControl on AC set to " << cmdRet;
+        Log() << "Max KeyboardBrightnessControl on AC set to " << cmdRet;
         return std::stof(cmdRet) / 100.f;
     }
     catch (std::invalid_argument &)
@@ -118,7 +118,7 @@ float GetKeyboardBatteryMaxBrightness()
     auto cmdRet = exec("kreadconfig5 --file " + GetHomeDir() + "/.config/powermanagementprofilesrc --group Battery --group KeyboardBrightnessControl --key value --default 100");
     try
     {
-        std::cout << "Max KeyboardBrightnessControl on battery set to " << cmdRet;
+        Log() << "Max KeyboardBrightnessControl on battery set to " << cmdRet;
         return std::stof(cmdRet) / 100.f;
     }
     catch (std::invalid_argument &)
@@ -132,7 +132,7 @@ float GetKeyboardLowBatteryMaxBrightness()
     auto cmdRet = exec("kreadconfig5 --file " + GetHomeDir() + "/.config/powermanagementprofilesrc --group LowBattery --group KeyboardBrightnessControl --key value --default 100");
     try
     {
-        std::cout << "Max KeyboardBrightnessControl on low battery set to " << cmdRet;
+        Log() << "Max KeyboardBrightnessControl on low battery set to " << cmdRet;
         return std::stof(cmdRet) / 100.f;
     }
     catch (std::invalid_argument &)
@@ -145,11 +145,11 @@ float GetMaxKeyboardLed()
 {
     auto batteryStatus = GetBatteryStatus();
     float backlightMax = Config::Global().Get("KeyboardLedMax", DefaultKeyboardLedMax);
-    std::cout << "Battery Status : " << batteryStatus;
+    Log() << "Battery Status : " << batteryStatus;
     if (batteryStatus == "Discharging\n")
     {
         auto batteryCapacityLevel = GetBatteryCapacityLevel();
-        std::cout << "Battery Capacity : " << batteryCapacityLevel;
+        Log() << "Battery Capacity : " << batteryCapacityLevel;
         if (batteryCapacityLevel == "Critical\n" || batteryCapacityLevel == "Low\n")
         {
             return std::min(backlightMax, GetKeyboardLowBatteryMaxBrightness());
@@ -169,11 +169,11 @@ float GetMaxBacklight()
 {
     auto batteryStatus = GetBatteryStatus();
     float backlightMax = Config::Global().Get("BacklightMax", DefaultBacklightMax);
-    std::cout << "Battery Status : " << batteryStatus;
+    Log() << "Battery Status : " << batteryStatus;
     if (batteryStatus == "Discharging\n")
     {
         auto batteryCapacityLevel = GetBatteryCapacityLevel();
-        std::cout << "Battery Capacity : " << batteryCapacityLevel;
+        Log() << "Battery Capacity : " << batteryCapacityLevel;
         if (batteryCapacityLevel == "Critical\n" || batteryCapacityLevel == "Low\n")
         {
             return std::min(backlightMax, GetBacklightLowBatteryMaxBrightness());
@@ -259,12 +259,12 @@ void Conf::Update()
     if (delta < confUpdateDelay)
         return;
     auto configPath = std::filesystem::absolute(GetConfigPath());
-    std::cout << "Config Path : " << configPath << "\n";
+    Log() << "Config Path : " << configPath << "\n";
     if (std::filesystem::exists(configPath))
         Config::Global().Parse(configPath);
     else
     {
-        std::cerr << "No config file, using default settings and saving them.\n";
+        Error() << "No config file, using default settings and saving them.\n";
 
         Config::Global().Set("ConfUpdateDelay", DefaultConfUpdateDelay);
 

@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <cmath>
 #include <thread>
 #include <cstring>
@@ -11,6 +10,7 @@
 #include <string>
 #include <algorithm>
 
+#include <Tools.hpp>
 #include <Conf.hpp>
 
 Conf config;
@@ -35,7 +35,7 @@ public:
         if (!firstUpdate && delta < config.sensorDelay)
             return;
         std::ifstream(config.sensorPath + "/in_illuminance_raw") >> illuminance;
-        std::cout << "Get sensor illuminance : " << illuminance << "\n";
+        Log() << "Get sensor illuminance : " << illuminance << "\n";
         illuminance = illuminance * config.sensorScale + config.sensorOffset;
         lastUpdate = std::chrono::high_resolution_clock::now();
         firstUpdate = false;
@@ -61,12 +61,12 @@ public:
         if (curBrightness == newBrightness)
             return;
         std::ofstream(config.backlightPath + "/brightness") << newBrightness;
-        std::cout << "Backlight brightness :\n"
-                  << "Min Brightness   " << config.backlightMin << "\n"
-                  << "Max Brightness   " << config.backlightMax << "\n"
-                  << "Brightness Scale " << config.backlightScale << "\n"
-                  << "New Brightness   " << newBrightness << "\n"
-                  << "Brightness       " << brightness << std::endl;
+        Log() << "Backlight brightness :\n"
+              << "Min Brightness   " << config.backlightMin << "\n"
+              << "Max Brightness   " << config.backlightMax << "\n"
+              << "Brightness Scale " << config.backlightScale << "\n"
+              << "New Brightness   " << newBrightness << "\n"
+              << "Brightness       " << brightness << std::endl;
         lastUpdate = std::chrono::high_resolution_clock::now();
         firstUpdate = false;
     }
@@ -96,12 +96,12 @@ public:
         if (curBrightness == newBrightness)
             return;
         std::ofstream(config.keyboardLedPath + "/brightness") << newBrightness;
-        std::cout << "Keyboard brightness :\n"
-                  << "Min Brightness   " << config.keyboardLedMin << "\n"
-                  << "Max Brightness   " << config.keyboardLedMax << "\n"
-                  << "Brightness Scale " << config.keyboardLedScale << "\n"
-                  << "New Brightness   " << newBrightness << "\n"
-                  << "Brightness       " << brightness << std::endl;
+        Log() << "Keyboard brightness :\n"
+              << "Min Brightness   " << config.keyboardLedMin << "\n"
+              << "Max Brightness   " << config.keyboardLedMax << "\n"
+              << "Brightness Scale " << config.keyboardLedScale << "\n"
+              << "New Brightness   " << newBrightness << "\n"
+              << "Brightness       " << brightness << std::endl;
         lastUpdate = std::chrono::high_resolution_clock::now();
         firstUpdate = false;
     }
@@ -123,9 +123,9 @@ int main(int argc, char const *argv[])
     Backlight backlight;
     KeyboardLed keyboardLed;
 
-    std::cout << "BacklightPath   : " << config.backlightPath << "\n"
-              << "SensorPath      : " << config.sensorPath << "\n"
-              << "KeyboardLedPath : " << config.keyboardLedPath << "\n";
+    Log() << "BacklightPath   : " << config.backlightPath << "\n"
+          << "SensorPath      : " << config.sensorPath << "\n"
+          << "KeyboardLedPath : " << config.keyboardLedPath << "\n";
     while (true)
     {
         sensor.Update();
