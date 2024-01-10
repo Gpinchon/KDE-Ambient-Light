@@ -28,20 +28,21 @@ float BrightessFromLuxReading(float a_Lux)
 class Sensor
 {
 public:
-    Sensor()
+    void Update()
     {
-        std::ifstream(config.sensorPath + "/in_illuminance_scale") >> illuminanceScale;
-        std::ifstream(config.sensorPath + "/in_illuminance_offset") >> illuminanceOffset;
+        const auto now = std::chrono::high_resolution_clock::now();
+        const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
+        if (!firstUpdate && delta < config.sensorDelay)
+            return;
+        std::ifstream(config.sensorPath + "/in_illuminance_raw") >> illuminance;
+        std::cout << "Get sensor illuminance : " << illuminance << "\n";
+        illuminance = illuminance * config.sensorScale + config.sensorOffset;
+        lastUpdate = std::chrono::high_resolution_clock::now();
+        firstUpdate = false;
     }
-    //@return the sensor illuminance in lumens
-    float GetIlluminance()
-    {
-        float illuminanceRaw;
-        std::ifstream(config.sensorPath + "/in_illuminance_raw") >> illuminanceRaw;
-        return illuminanceRaw * illuminanceScale + illuminanceOffset;
-    }
-    float illuminanceScale = 0;
-    float illuminanceOffset = 0;
+    std::chrono::high_resolution_clock::time_point lastUpdate = std::chrono::high_resolution_clock::now();
+    bool firstUpdate = true;
+    float illuminance = 0;
 };
 
 class Backlight
@@ -51,7 +52,7 @@ public:
     {
         const auto now = std::chrono::high_resolution_clock::now();
         const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
-        if (delta < config.backlightDelay)
+        if (!firstUpdate && delta < config.backlightDelay)
             return;
         int curBrightness = 0;
         std::ifstream(config.backlightPath + "/brightness") >> curBrightness;
@@ -67,6 +68,7 @@ public:
                   << "New Brightness   " << newBrightness << "\n"
                   << "Brightness       " << brightness << std::endl;
         lastUpdate = std::chrono::high_resolution_clock::now();
+        firstUpdate = false;
     }
     void SetBrightness(const float &a_Value)
     {
@@ -75,6 +77,7 @@ public:
 
 private:
     std::chrono::high_resolution_clock::time_point lastUpdate = std::chrono::high_resolution_clock::now();
+    bool firstUpdate = true;
     float brightness;
 };
 
@@ -85,7 +88,7 @@ public:
     {
         const auto now = std::chrono::high_resolution_clock::now();
         const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
-        if (delta < config.backlightDelay)
+        if (!firstUpdate && delta < config.sensorDelay)
             return;
         float curBrightness = 0;
         std::ifstream(config.keyboardLedPath + "/brightness") >> curBrightness;
@@ -100,6 +103,7 @@ public:
                   << "New Brightness   " << newBrightness << "\n"
                   << "Brightness       " << brightness << std::endl;
         lastUpdate = std::chrono::high_resolution_clock::now();
+        firstUpdate = false;
     }
 
     void SetBrightness(const float &a_Value)
@@ -109,6 +113,7 @@ public:
 
 private:
     std::chrono::high_resolution_clock::time_point lastUpdate = std::chrono::high_resolution_clock::now();
+    bool firstUpdate = true;
     float brightness;
 };
 
@@ -118,20 +123,19 @@ int main(int argc, char const *argv[])
     Backlight backlight;
     KeyboardLed keyboardLed;
 
-    auto delay = std::chrono::milliseconds(16);
     std::cout << "BacklightPath   : " << config.backlightPath << "\n"
               << "SensorPath      : " << config.sensorPath << "\n"
               << "KeyboardLedPath : " << config.keyboardLedPath << "\n";
     while (true)
     {
-        auto sensorIlluminance = sensor.GetIlluminance();
-        auto brightness = BrightessFromLuxReading(sensorIlluminance);
+        sensor.Update();
+        auto brightness = BrightessFromLuxReading(sensor.illuminance);
         backlight.SetBrightness(brightness);
         keyboardLed.SetBrightness(1 - brightness);
         config.Update();
         backlight.Update();
         keyboardLed.Update();
-        std::this_thread::sleep_for(delay);
+        std::this_thread::sleep_for(std::chrono::milliseconds(config.loopDelay));
     }
     return 0;
 }

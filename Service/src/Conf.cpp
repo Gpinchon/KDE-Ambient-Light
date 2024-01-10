@@ -20,6 +20,7 @@ BacklightMin    = 0.0
 BacklightMax    = 1.0
 
 SensorPath      = /sys/bus/iio/devices/iio:device0
+SensorDelay     = 500
 
 KeyboardLedPath  = /sys/class/leds/platform::kbd_backlight/
 KeyboardLedDelay = 1000
@@ -37,7 +38,7 @@ constexpr auto DefaultBacklightMin = 0;
 constexpr auto DefaultBacklightMax = 1;
 
 constexpr auto DefaultSensorPath = "/sys/bus/iio/devices/iio:device0";
-constexpr auto DefaultSensorDelay = 32;
+constexpr auto DefaultSensorDelay = 500;
 
 constexpr auto DefaultKeyboardLedPath = "/sys/class/leds/platform::kbd_backlight/";
 constexpr auto DefaultKeyboardLedDelay = 1000;
@@ -317,6 +318,8 @@ void Conf::Update()
 
     sensorPath = GetSensorPath();
     sensorDelay = Config::Global().Get("SensorDelay", DefaultSensorDelay);
+    std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
+    std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
     backlightPath = GetBacklightPath();
     backlightDelay = Config::Global().Get("BacklightDelay", DefaultBacklightDelay);
@@ -329,6 +332,10 @@ void Conf::Update()
     keyboardLedMin = Config::Global().Get("BacklightMin", DefaultBacklightMin);
     keyboardLedMax = GetMaxKeyboardLed();
     std::ifstream(keyboardLedPath + "/max_brightness") >> keyboardLedScale;
+
+    loopDelay = std::min(sensorDelay, backlightDelay);
+    loopDelay = std::min(loopDelay, keyboardLedDelay);
+    loopDelay = std::min(loopDelay, confUpdateDelay);
 
     lastUpdate = std::chrono::high_resolution_clock::now();
 }

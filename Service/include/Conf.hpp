@@ -11,10 +11,14 @@ struct Conf
     }
     void Update();
 
+    int loopDelay = 0;
+
     int confUpdateDelay = 0;
 
     std::string sensorPath;
-    int sensorDelay = 32;
+    float sensorScale = 0;
+    float sensorOffset = 0;
+    int sensorDelay = 0;
 
     std::string backlightPath;
     float backlightMax = 0;
