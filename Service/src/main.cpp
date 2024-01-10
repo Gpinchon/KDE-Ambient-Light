@@ -1,21 +1,3 @@
-// #include <glob.h>
-// #include <iostream>
-
-// int main(int argc, char const *argv[])
-// {
-//     glob_t globStruct;
-//     glob(
-//         "/sys/class/backlight/*",
-//         0,
-//         nullptr,
-//         &globStruct);
-//     for (auto i = 0; i < globStruct.gl_pathc; ++i)
-//     {
-//         std::cout << globStruct.gl_pathv[i] << "\n";
-//     }
-//     return 0;
-// }
-
 #include <array>
 #include <cstdlib>
 #include <filesystem>
@@ -74,11 +56,12 @@ public:
         int curBrightness = 0;
         std::ifstream(config.backlightPath + "/brightness") >> curBrightness;
         auto newBrightness = int(brightness * config.backlightScale);
-        auto threshold = int(config.backlightSteps * config.backlightScale);
-        if (abs(curBrightness - newBrightness) < threshold)
+        newBrightness = curBrightness * 0.9f + newBrightness * 0.1f;
+        if (curBrightness == newBrightness)
             return;
         std::ofstream(config.backlightPath + "/brightness") << newBrightness;
-        std::cout << "Min Brightness   " << config.backlightMin << "\n"
+        std::cout << "Backlight brightness :\n"
+                  << "Min Brightness   " << config.backlightMin << "\n"
                   << "Max Brightness   " << config.backlightMax << "\n"
                   << "Brightness Scale " << config.backlightScale << "\n"
                   << "New Brightness   " << newBrightness << "\n"
@@ -98,20 +81,35 @@ private:
 class KeyboardLed
 {
 public:
-    float GetBrightness()
+    void Update()
     {
-        float bightness = 0;
-        std::ifstream(config.keyboardLedPath + "/brightness") >> bightness;
-        return bightness;
+        const auto now = std::chrono::high_resolution_clock::now();
+        const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
+        if (delta < config.backlightDelay)
+            return;
+        float curBrightness = 0;
+        std::ifstream(config.keyboardLedPath + "/brightness") >> curBrightness;
+        auto newBrightness = int(brightness * config.keyboardLedScale);
+        if (curBrightness == newBrightness)
+            return;
+        std::ofstream(config.keyboardLedPath + "/brightness") << newBrightness;
+        std::cout << "Keyboard brightness :\n"
+                  << "Min Brightness   " << config.keyboardLedMin << "\n"
+                  << "Max Brightness   " << config.keyboardLedMax << "\n"
+                  << "Brightness Scale " << config.keyboardLedScale << "\n"
+                  << "New Brightness   " << newBrightness << "\n"
+                  << "Brightness       " << brightness << std::endl;
+        lastUpdate = std::chrono::high_resolution_clock::now();
     }
+
     void SetBrightness(const float &a_Value)
     {
-        auto currentValue = int(GetBrightness() * config.keyboardScale);
-        auto newValue = int(a_Value * config.keyboardScale);
-        if (currentValue == newValue)
-            return;
-        std::ofstream(config.keyboardLedPath + "/brightness") << newValue;
+        brightness = std::clamp(a_Value, config.keyboardLedMin, config.keyboardLedMax);
     }
+
+private:
+    std::chrono::high_resolution_clock::time_point lastUpdate = std::chrono::high_resolution_clock::now();
+    float brightness;
 };
 
 int main(int argc, char const *argv[])
@@ -132,6 +130,7 @@ int main(int argc, char const *argv[])
         keyboardLed.SetBrightness(1 - brightness);
         config.Update();
         backlight.Update();
+        keyboardLed.Update();
         std::this_thread::sleep_for(delay);
     }
     return 0;
