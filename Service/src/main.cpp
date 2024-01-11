@@ -15,6 +15,7 @@
 
 Conf config;
 
+//inspired by https://www.analog.com/en/design-notes/a-simple-implementation-of-lcd-brightness-control-using-the-max44009-ambientlight-sensor.html
 float BrightessFromLuxReading(float a_Lux)
 {
     if (a_Lux > config.maxLuxBreakpoint)
