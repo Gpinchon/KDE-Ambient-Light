@@ -32,12 +32,6 @@ std::string GetHomeDir()
     static std::string homeDir;
     if (!homeDir.empty())
         return homeDir;
-    Log() << "Are we running a root ?\n";
-    if (getuid() != 0)
-    {
-        Error() << "We need root access\n";
-        exit(-1);
-    }
     Log() << "Getting home directory...\n";
     std::string logName = exec("logname");
     Log() << "Logname " << logName << "\n";
