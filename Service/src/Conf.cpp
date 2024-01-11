@@ -323,7 +323,7 @@ void Conf::Update()
     backlightMax = GetMaxBacklight();
     std::ifstream(backlightPath + "/max_brightness") >> backlightScale;
 
-    keyboardLedEnabled = Config::Global().Get("BacklightEnabled", DefaultBacklightEnabled);
+    keyboardLedEnabled = Config::Global().Get("KeyboardLedEnabled", DefaultKeyboardLedEnabled);
     keyboardLedPath = GetKBLedPath();
     keyboardLedDelay = Config::Global().Get("KeyboardLedDelay", DefaultKeyboardLedDelay);
     keyboardLedMin = Config::Global().Get("BacklightMin", DefaultBacklightMin);
