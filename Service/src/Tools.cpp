@@ -17,7 +17,8 @@ std::string exec(const std::string &a_Cmd)
     {
         result += buffer.data();
     }
-    return result;
+    // remove trailing \n
+    return {result.begin(), result.end() - 1};
 }
 
 class NullBuffer : public std::streambuf

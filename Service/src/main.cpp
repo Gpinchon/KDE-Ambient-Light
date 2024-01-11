@@ -129,13 +129,19 @@ int main(int argc, char const *argv[])
           << "KeyboardLedPath : " << config.keyboardLedPath << "\n";
     while (true)
     {
+        config.Update();
         sensor.Update();
         auto brightness = BrightessFromLuxReading(sensor.illuminance);
-        backlight.SetBrightness(brightness);
-        keyboardLed.SetBrightness(1 - brightness);
-        config.Update();
-        backlight.Update();
-        keyboardLed.Update();
+        if (config.backlightEnabled)
+        {
+            backlight.SetBrightness(brightness);
+            backlight.Update();
+        }
+        if (config.keyboardLedEnabled)
+        {
+            keyboardLed.SetBrightness(1 - brightness);
+            keyboardLed.Update();
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(config.loopDelay));
     }
     return 0;

@@ -10,14 +10,16 @@
 
 constexpr auto DefaultConfUpdateDelay = 5000;
 
+constexpr auto DefaultSensorPath = "/sys/bus/iio/devices/iio:device0";
+constexpr auto DefaultSensorDelay = 500;
+
+constexpr auto DefaultBacklightEnabled = true;
 constexpr auto DefaultBacklightPath = "/sys/class/backlight/*";
 constexpr auto DefaultBacklightDelay = 32; // default update frequency is 30 times/sec
 constexpr auto DefaultBacklightMin = 0;
 constexpr auto DefaultBacklightMax = 1;
 
-constexpr auto DefaultSensorPath = "/sys/bus/iio/devices/iio:device0";
-constexpr auto DefaultSensorDelay = 500;
-
+constexpr auto DefaultKeyboardLedEnabled = true;
 constexpr auto DefaultKeyboardLedPath = "/sys/class/leds/platform::kbd_backlight/";
 constexpr auto DefaultKeyboardLedDelay = 1000;
 constexpr auto DefaultKeyboardLedMin = 0;
@@ -30,8 +32,20 @@ std::string GetHomeDir()
     static std::string homeDir;
     if (!homeDir.empty())
         return homeDir;
-    Log() << "Getting home dir...\n";
-    auto pw = getpwuid(getuid());
+    Log() << "Are we running a root ?\n";
+    if (getuid() != 0)
+    {
+        Error() << "We need root access\n";
+        exit(-1);
+    }
+    Log() << "Getting home directory...\n";
+    std::string logName = exec("logname");
+    Log() << "Logname " << logName << "\n";
+    auto pw = getpwnam(logName.c_str());
+    if (pw == nullptr)
+    {
+        throw std::runtime_error("Cannot retreive user");
+    }
     if (pw->pw_name == nullptr || std::string(pw->pw_name) == "root")
     {
         Log() << "Running as root, figuring out sudoer\n";
@@ -275,14 +289,16 @@ void Conf::Update()
 
         Config::Global().Set("ConfUpdateDelay", DefaultConfUpdateDelay);
 
+        Config::Global().Set("SensorPath", DefaultSensorPath);
+        Config::Global().Set("SensorDelay", DefaultSensorDelay);
+
+        Config::Global().Set("BacklightEnabled", DefaultBacklightEnabled);
         Config::Global().Set("BacklightPath", DefaultBacklightPath);
         Config::Global().Set("BacklightDelay", DefaultBacklightDelay);
         Config::Global().Set("BacklightMin", DefaultBacklightMin);
         Config::Global().Set("BacklightMax", DefaultBacklightMax);
 
-        Config::Global().Set("SensorPath", DefaultSensorPath);
-        Config::Global().Set("SensorDelay", DefaultSensorDelay);
-
+        Config::Global().Set("KeyboardLedEnabled", DefaultKeyboardLedEnabled);
         Config::Global().Set("KeyboardLedPath", DefaultKeyboardLedPath);
         Config::Global().Set("KeyboardLedDelay", DefaultKeyboardLedDelay);
         Config::Global().Set("KeyboardLedMin", DefaultKeyboardLedMin);
@@ -306,21 +322,26 @@ void Conf::Update()
     std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
+    backlightEnabled = Config::Global().Get("BacklightEnabled", DefaultBacklightEnabled);
     backlightPath = GetBacklightPath();
     backlightDelay = Config::Global().Get("BacklightDelay", DefaultBacklightDelay);
     backlightMin = Config::Global().Get("BacklightMin", DefaultBacklightMin);
     backlightMax = GetMaxBacklight();
     std::ifstream(backlightPath + "/max_brightness") >> backlightScale;
 
+    keyboardLedEnabled = Config::Global().Get("BacklightEnabled", DefaultBacklightEnabled);
     keyboardLedPath = GetKBLedPath();
     keyboardLedDelay = Config::Global().Get("KeyboardLedDelay", DefaultKeyboardLedDelay);
     keyboardLedMin = Config::Global().Get("BacklightMin", DefaultBacklightMin);
     keyboardLedMax = GetMaxKeyboardLed();
     std::ifstream(keyboardLedPath + "/max_brightness") >> keyboardLedScale;
 
-    loopDelay = std::min(sensorDelay, backlightDelay);
-    loopDelay = std::min(loopDelay, keyboardLedDelay);
-    loopDelay = std::min(loopDelay, confUpdateDelay);
+    loopDelay = confUpdateDelay;
+    loopDelay = std::min(loopDelay, sensorDelay);
+    if (backlightEnabled)
+        loopDelay = std::min(loopDelay, backlightDelay);
+    if (keyboardLedEnabled)
+        loopDelay = std::min(loopDelay, keyboardLedDelay);
 
     lastUpdate = std::chrono::high_resolution_clock::now();
 }

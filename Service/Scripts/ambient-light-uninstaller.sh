@@ -1,16 +1,23 @@
 #!/bin/bash
 
 SOURCE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+BINDIR="/usr/bin"
+SERVICEDIR="/etc/systemd/user"
 
-if compgen -G "/usr/bin/ambient-light" > /dev/null;
-then
+if test -f "$BINDIR/ambient-light"; then
     echo "Uninstalling Ambient Light service"
     echo "Stopping ambient-light.service"
-    systemctl stop ambient-light.service;
-    echo "Removing /etc/systemd/system/ambient-light.service"
-    sudo sh -c "rm /etc/systemd/system/ambient-light.service"
-    echo "Removing /usr/bin/ambient-light"
-    sudo sh -c "rm /usr/bin/ambient-light"
-    systemctl daemon-reload
+    systemctl --user stop ambient-light.service
+    echo "Disabling ambient-light.service"
+    sudo systemctl --global disable ambient-light.service
+    echo "Removing $SERVICEDIR/ambient-light.service"
+    sudo rm "$SERVICEDIR/ambient-light.service"
+    echo "Removing $BINDIR/ambient-light"
+    sudo rm "$BINDIR/ambient-light"
+    echo "Removing service executable to sudoers"
+    sudo rm /etc/sudoers.d/ambient-light
+    systemctl --user daemon-reload
     echo "Uninstallation done !"
+else
+    echo "Ambient Light Service not installed !"
 fi
