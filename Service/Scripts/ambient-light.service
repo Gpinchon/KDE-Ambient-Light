@@ -3,7 +3,9 @@ Description=Automatic brightness service
 
 [Service]
 Type=simple
-ExecStart=exec /usr/bin/ambient-light
+ExecStart=/usr/bin/ambient-light
+Restart=on-failure
+RestartSec=5s
 StandardOutput=journal
 StandardError=journal
 
