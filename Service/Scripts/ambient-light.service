@@ -3,7 +3,7 @@ Description=Automatic brightness service
 
 [Service]
 Type=simple
-ExecStart=exec sudo /usr/bin/ambient-light
+ExecStart=exec /usr/bin/ambient-light
 StandardOutput=journal
 StandardError=journal
 

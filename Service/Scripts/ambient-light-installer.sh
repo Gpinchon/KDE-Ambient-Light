@@ -11,8 +11,6 @@ echo "Copying ambient-light to $BINDIR/ambient-light"
 sudo cp "$SOURCE/ambient-light" "$BINDIR/ambient-light"
 echo "Relaunching systemd"
 systemctl --user daemon-reload
-echo "Adding service executable to sudoers"
-sh -c "echo ALL ALL=NOPASSWD: $BINDIR/ambient-light | sudo tee /etc/sudoers.d/ambient-light"
 echo "Starting Ambient Light Service"
 systemctl --user start ambient-light.service
 echo "Enabling Ambient Light Service"

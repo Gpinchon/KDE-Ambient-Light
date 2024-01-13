@@ -14,8 +14,6 @@ if test -f "$BINDIR/ambient-light"; then
     sudo rm "$SERVICEDIR/ambient-light.service"
     echo "Removing $BINDIR/ambient-light"
     sudo rm "$BINDIR/ambient-light"
-    echo "Removing service executable to sudoers"
-    sudo rm /etc/sudoers.d/ambient-light
     systemctl --user daemon-reload
     echo "Uninstallation done !"
 else
