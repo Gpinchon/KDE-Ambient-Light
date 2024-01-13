@@ -6,6 +6,9 @@ Type=simple
 ExecStart=/usr/bin/ambient-light
 Restart=on-failure
 RestartSec=5s
+# limit to 6 restart attempts every hour
+StartLimitIntervalSec=3600
+StartLimitBurst=6
 StandardOutput=journal
 StandardError=journal
 
