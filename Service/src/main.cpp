@@ -1,21 +1,11 @@
-#include <array>
-#include <cstdlib>
-#include <filesystem>
-#include <fstream>
-#include <cmath>
-#include <thread>
-#include <cstring>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <algorithm>
-
 #include <DBUS.hpp>
 #include <KeyboardLed.hpp>
 #include <Backlight.hpp>
 #include <Sensor.hpp>
 #include <Tools.hpp>
 #include <Conf.hpp>
+
+#include <thread>
 
 int main(int argc, char const *argv[])
 {
