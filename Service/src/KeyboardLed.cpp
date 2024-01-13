@@ -14,11 +14,11 @@ void KeyboardLed::Update()
     int curBrightness = 0;
 
     {
-        DBUSMethodCall methodCall("local.org_kde_powerdevil",
+        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
                                   "keyboardBrightness");
-        DBUSReply reply(dBusConnection.Send(methodCall));
+        DBUSReply reply(conf.dBusConnection.Send(methodCall));
         reply.GetArgs(DBUS_TYPE_INT32, &curBrightness);
     }
 
@@ -26,12 +26,12 @@ void KeyboardLed::Update()
     if (curBrightness == newBrightness)
         return;
     {
-        DBUSMethodCall methodCall("local.org_kde_powerdevil",
+        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
                                   "setKeyboardBrightnessSilent");
         methodCall.SetArgs(DBUS_TYPE_INT32, &newBrightness);
-        dBusConnection.Send(methodCall);
+        conf.dBusConnection.Send(methodCall);
     }
     Log() << "Keyboard brightness :\n"
           << "Min Brightness   " << conf.keyboardLedMin << "\n"

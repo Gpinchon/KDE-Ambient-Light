@@ -1,6 +1,7 @@
 #include <Conf.hpp>
 #include <Config.hpp>
 #include <Tools.hpp>
+#include <DBUS.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -198,53 +199,12 @@ float GetMaxBacklight()
     }
 }
 
-bool BacklightPathValid(const std::filesystem::path &a_Path)
-{
-    if (std::filesystem::exists(a_Path))
-    {
-        auto enabledPath = a_Path / "device/enabled";
-        auto brightnessPath = a_Path / "brightness";
-        auto maxBrightnessPath = a_Path / "max_brightness";
-        if (!std::filesystem::exists(enabledPath) || !std::filesystem::exists(brightnessPath) || !std::filesystem::exists(maxBrightnessPath))
-            return false;
-        std::ifstream file(enabledPath);
-        std::string enabled;
-        file >> enabled;
-        return enabled == "enabled";
-    }
-    return false;
-}
-
 bool SensorPathValid(const std::filesystem::path &a_Path)
 {
     auto illuRaw = a_Path / "in_illuminance_raw";
     auto illuScale = a_Path / "in_illuminance_scale";
     auto illuOffset = a_Path / "in_illuminance_offset";
     return std::filesystem::exists(a_Path) && std::filesystem::exists(illuRaw) && std::filesystem::exists(illuScale) && std::filesystem::exists(illuOffset);
-}
-
-bool KeyboardLedPathValid(const std::filesystem::path &a_Path)
-{
-    auto brightnessPath = a_Path / "brightness";
-    auto maxBrightnessPath = a_Path / "max_brightness";
-    return std::filesystem::exists(brightnessPath) && std::filesystem::exists(maxBrightnessPath);
-}
-
-std::string GetBacklightPath()
-{
-    auto configPath = Config::Global().Get("BacklightPath", std::string(DefaultBacklightPath));
-    glob_t globStruct;
-    glob(
-        configPath.c_str(),
-        0,
-        nullptr,
-        &globStruct);
-    for (auto i = 0; i < globStruct.gl_pathc; ++i)
-    {
-        if (BacklightPathValid(globStruct.gl_pathv[i]))
-            return globStruct.gl_pathv[i];
-    }
-    return "";
 }
 
 std::string GetSensorPath()
@@ -254,14 +214,7 @@ std::string GetSensorPath()
     return "";
 }
 
-std::string GetKBLedPath()
-{
-    if (auto configPath = Config::Global().Get("KeyboardLedPath", std::string(DefaultKeyboardLedPath)); KeyboardLedPathValid(configPath))
-        return configPath;
-    return "";
-}
-
-Conf::Conf()
+Conf::Conf(DBUSConnection &a_DBusConnection) : dBusConnection(a_DBusConnection)
 {
     Log() << "Creating Conf\n";
     Update();
@@ -317,18 +270,30 @@ void Conf::Update()
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
     backlightEnabled = Config::Global().Get("BacklightEnabled", DefaultBacklightEnabled);
-    backlightPath = GetBacklightPath();
     backlightDelay = Config::Global().Get("BacklightDelay", DefaultBacklightDelay);
     backlightMin = Config::Global().Get("BacklightMin", DefaultBacklightMin);
     backlightMax = GetMaxBacklight();
-    std::ifstream(backlightPath + "/max_brightness") >> backlightScale;
+    {
+        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+                                  "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                  "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
+                                  "brightnessMax");
+        DBUSReply reply(dBusConnection.Send(methodCall));
+        reply.GetArgs(DBUS_TYPE_INT32, &backlightScale);
+    }
 
     keyboardLedEnabled = Config::Global().Get("KeyboardLedEnabled", DefaultKeyboardLedEnabled);
-    keyboardLedPath = GetKBLedPath();
     keyboardLedDelay = Config::Global().Get("KeyboardLedDelay", DefaultKeyboardLedDelay);
     keyboardLedMin = Config::Global().Get("KeyboardLedMin", DefaultKeyboardLedMin);
     keyboardLedMax = GetMaxKeyboardLed();
-    std::ifstream(keyboardLedPath + "/max_brightness") >> keyboardLedScale;
+    {
+        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+                                  "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+                                  "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+                                  "keyboardBrightnessMax");
+        DBUSReply reply(dBusConnection.Send(methodCall));
+        reply.GetArgs(DBUS_TYPE_INT32, &keyboardLedScale);
+    }
 
     loopDelay = confUpdateDelay;
     loopDelay = std::min(loopDelay, sensorDelay);

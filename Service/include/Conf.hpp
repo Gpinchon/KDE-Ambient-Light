@@ -3,9 +3,12 @@
 #include <string>
 #include <chrono>
 
-struct Conf
+class DBUSConnection;
+
+class Conf
 {
-    Conf();
+public:
+    explicit Conf(DBUSConnection &a_DBusConnection);
     void Update();
 
     int loopDelay = 0;
@@ -17,21 +20,22 @@ struct Conf
     float sensorOffset = 0;
     int sensorDelay = 0;
 
-    std::string backlightPath;
     bool backlightEnabled = true;
     float backlightMax = 0;
     float backlightMin = 0;
-    float backlightScale = 0;
+    int32_t backlightScale = 0;
     int backlightDelay = 0;
 
-    std::string keyboardLedPath;
     bool keyboardLedEnabled = true;
     float keyboardLedMin = 0;
     float keyboardLedMax = 0;
-    float keyboardLedScale = 0;
+    int32_t keyboardLedScale = 0;
     int keyboardLedDelay = 0;
 
     float maxLuxBreakpoint = 0;
 
+    DBUSConnection &dBusConnection;
+
+private:
     std::chrono::high_resolution_clock::time_point lastUpdate;
 };

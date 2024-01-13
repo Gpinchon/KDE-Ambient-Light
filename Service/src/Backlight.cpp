@@ -14,11 +14,11 @@ void Backlight::Update()
     int curBrightness = 0;
 
     {
-        DBUSMethodCall methodCall("local.org_kde_powerdevil",
+        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                   "brightness");
-        DBUSReply reply(dBusConnection.Send(methodCall));
+        DBUSReply reply(conf.dBusConnection.Send(methodCall));
         reply.GetArgs(DBUS_TYPE_INT32, &curBrightness);
     }
 
@@ -27,12 +27,12 @@ void Backlight::Update()
     if (curBrightness == newBrightness)
         return;
     {
-        DBUSMethodCall methodCall("local.org_kde_powerdevil",
+        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                   "setBrightnessSilent");
         methodCall.SetArgs(DBUS_TYPE_INT32, &newBrightness);
-        dBusConnection.Send(methodCall);
+        conf.dBusConnection.Send(methodCall);
     }
     Log() << "Backlight brightness :\n"
           << "Min Brightness   " << conf.backlightMin << "\n"

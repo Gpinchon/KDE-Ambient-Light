@@ -26,12 +26,12 @@ public:
     }
 };
 
-class DBUSConnection : DBUSObject<::DBusConnection *>
+class DBUSConnection : public DBUSObject<::DBusConnection *>
 {
 public:
     DBUSConnection();
     ~DBUSConnection();
-    ::DBusMessage *Send(::DBusMessage *);
+    ::DBusMessage *Send(::DBusMessage *) const;
 };
 
 class DBUSMessage : public DBUSObject<::DBusMessage *>

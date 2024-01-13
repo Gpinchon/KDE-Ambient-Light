@@ -28,7 +28,7 @@ DBUSConnection::~DBUSConnection()
     dbus_connection_unref(data);
 }
 
-::DBusMessage *DBUSConnection::Send(::DBusMessage *a_Msg)
+::DBusMessage *DBUSConnection::Send(::DBusMessage *a_Msg) const
 {
     auto dbus_error = GetDBUSError();
     auto dbus_msg = dbus_connection_send_with_reply_and_block(

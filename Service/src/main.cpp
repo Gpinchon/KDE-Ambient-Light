@@ -21,14 +21,12 @@ int main(int argc, char const *argv[])
 {
     Log() << "Starting...\n";
     DBUSConnection dBusConnection;
-    Conf config;
-    Sensor sensor(config, dBusConnection);
-    Backlight backlight(config, dBusConnection);
-    KeyboardLed keyboardLed(config, dBusConnection);
+    Conf config(dBusConnection);
+    Sensor sensor(config);
+    Backlight backlight(config);
+    KeyboardLed keyboardLed(config);
 
-    Log() << "BacklightPath   : " << config.backlightPath << "\n"
-          << "SensorPath      : " << config.sensorPath << "\n"
-          << "KeyboardLedPath : " << config.keyboardLedPath << "\n";
+    Log() << "SensorPath : " << config.sensorPath << "\n";
     while (true)
     {
         config.Update();

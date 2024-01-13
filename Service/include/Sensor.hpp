@@ -2,19 +2,17 @@
 
 #include <chrono>
 
-struct Conf;
-class DBUSConnection;
+class Conf;
 
 class Sensor
 {
 public:
-    Sensor(const Conf &a_Conf, DBUSConnection &a_DBUSConnection) : conf(a_Conf), dBusConnection(a_DBUSConnection) {}
+    Sensor(const Conf &a_Conf) : conf(a_Conf) {}
     void Update();
     float GetBrightness() const;
 
 private:
     const Conf &conf;
-    DBUSConnection &dBusConnection;
     std::chrono::high_resolution_clock::time_point lastUpdate = std::chrono::high_resolution_clock::now();
     bool firstUpdate = true;
     float illuminance = 0;
