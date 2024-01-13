@@ -1,5 +1,6 @@
 [Unit]
 Description=Automatic brightness service
+After=plasma-powerdevil.service
 
 [Service]
 Type=simple
@@ -7,10 +8,10 @@ ExecStart=/usr/bin/ambient-light
 Restart=on-failure
 RestartSec=5s
 # limit to 6 restart attempts every hour
-StartLimitIntervalSec=3600
+StartLimitInterval=3600
 StartLimitBurst=6
 StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=plasma-workspace.target
