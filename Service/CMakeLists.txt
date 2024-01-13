@@ -38,6 +38,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 add_executable(ambient-light
   ${SERVICE_SRC} ${SERVICE_INCLUDE})
 
+set_target_properties(ambient-light PROPERTIES DEBUG_POSTFIX "-log")
+
 target_include_directories(ambient-light PUBLIC
   ${DBUS_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/)
