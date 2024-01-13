@@ -29,8 +29,6 @@ BacklightMax     = 1.0
 
 //Enable/Disables automatic keyboard LED
 KeyboardLedEnabled = 1
-//Keyboard LED path, might vary depending on the configuration
-KeyboardLedPath  = /sys/class/leds/platform::kbd_backlight/
 //Leyboard LED update delay in milliseconds
 KeyboardLedDelay = 1000
 //Keyboard LED minimum value
