@@ -13,6 +13,7 @@ constexpr auto DefaultConfUpdateDelay = 5000;
 
 constexpr auto DefaultSensorPath = "/sys/bus/iio/devices/iio:device0";
 constexpr auto DefaultSensorDelay = 500;
+constexpr auto DefaultSensorSmoothing = 10;
 
 constexpr auto DefaultBacklightEnabled = true;
 constexpr auto DefaultBacklightPath = "/sys/class/backlight/*";
@@ -180,11 +181,11 @@ float GetMaxBacklight()
     auto batteryStatus = GetBatteryStatus();
     float backlightMax = Config::Global().Get("BacklightMax", DefaultBacklightMax);
     Log() << "Battery Status : " << batteryStatus;
-    if (batteryStatus == "Discharging\n")
+    if (batteryStatus == "Discharging")
     {
         auto batteryCapacityLevel = GetBatteryCapacityLevel();
         Log() << "Battery Capacity : " << batteryCapacityLevel;
-        if (batteryCapacityLevel == "Critical\n" || batteryCapacityLevel == "Low\n")
+        if (batteryCapacityLevel == "Critical" || batteryCapacityLevel == "Low")
         {
             return std::min(backlightMax, GetBacklightLowBatteryMaxBrightness());
         }
@@ -218,6 +219,14 @@ Conf::Conf(DBUSConnection &a_DBusConnection) : dBusConnection(a_DBusConnection)
 {
     Log() << "Creating Conf\n";
     Update();
+    {
+        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+                                  "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                                  "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
+                                  "brightnessMax");
+        DBUSReply reply(dBusConnection.Send(methodCall));
+        reply.GetArgs(DBUS_TYPE_INT32, &backlightScale);
+    }
 }
 
 void Conf::Update()
@@ -228,36 +237,12 @@ void Conf::Update()
         return;
     auto configPath = std::filesystem::absolute(GetConfigPath());
     Log() << "Config Path : " << configPath << "\n";
-    if (std::filesystem::exists(configPath))
+    bool confFileExists = std::filesystem::exists(configPath);
+    if (confFileExists)
         Config::Global().Parse(configPath);
     else
     {
         Error() << "No config file, using default settings and saving them.\n";
-
-        Config::Global().Set("ConfUpdateDelay", DefaultConfUpdateDelay);
-
-        Config::Global().Set("SensorPath", DefaultSensorPath);
-        Config::Global().Set("SensorDelay", DefaultSensorDelay);
-
-        Config::Global().Set("BacklightEnabled", DefaultBacklightEnabled);
-        Config::Global().Set("BacklightPath", DefaultBacklightPath);
-        Config::Global().Set("BacklightDelay", DefaultBacklightDelay);
-        Config::Global().Set("BacklightMin", DefaultBacklightMin);
-        Config::Global().Set("BacklightMax", DefaultBacklightMax);
-
-        Config::Global().Set("KeyboardLedEnabled", DefaultKeyboardLedEnabled);
-        Config::Global().Set("KeyboardLedPath", DefaultKeyboardLedPath);
-        Config::Global().Set("KeyboardLedDelay", DefaultKeyboardLedDelay);
-        Config::Global().Set("KeyboardLedMin", DefaultKeyboardLedMin);
-        Config::Global().Set("KeyboardLedMax", DefaultKeyboardLedMax);
-
-        Config::Global().Set("MaxLuxBreakpoint", DefaultMaxLuxBreakpoint);
-
-        Config::Global().Save(configPath);
-        std::filesystem::permissions(
-            configPath,
-            std::filesystem::perms::all,
-            std::filesystem::perm_options::add);
     }
 
     confUpdateDelay = Config::Global().Get("ConfUpdateDelay", DefaultConfUpdateDelay);
@@ -266,6 +251,7 @@ void Conf::Update()
 
     sensorPath = GetSensorPath();
     sensorDelay = Config::Global().Get("SensorDelay", DefaultSensorDelay);
+    sensorSmoothing = Config::Global().Get("SensorSmoothing", DefaultSensorSmoothing);
     std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
@@ -301,6 +287,16 @@ void Conf::Update()
         loopDelay = std::min(loopDelay, backlightDelay);
     if (keyboardLedEnabled)
         loopDelay = std::min(loopDelay, keyboardLedDelay);
+
+    if (!confFileExists)
+    {
+        Log() << "Saving config file\n";
+        Config::Global().Save(configPath);
+        std::filesystem::permissions(
+            configPath,
+            std::filesystem::perms::all,
+            std::filesystem::perm_options::add);
+    }
 
     lastUpdate = std::chrono::high_resolution_clock::now();
 }

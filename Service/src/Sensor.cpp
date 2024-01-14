@@ -19,13 +19,11 @@ void Sensor::Update()
     firstUpdate = false;
 }
 
-// inspired by https://www.analog.com/en/design-notes/a-simple-implementation-of-lcd-brightness-control-using-the-max44009-ambientlight-sensor.html
 float Sensor::GetBrightness() const
 {
-    if (illuminance > conf.maxLuxBreakpoint)
-        return 1.0;
-    else if (illuminance > 0)
-        return (9.9323 * log(illuminance) + 27.059) / 100.0;
+    auto x = std::min(illuminance, conf.maxLuxBreakpoint) / conf.maxLuxBreakpoint;
+    if (illuminance > 0)
+        return 1 - powf(1 - x, conf.sensorSmoothing);
     else
         return 0;
 }

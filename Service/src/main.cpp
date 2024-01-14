@@ -10,8 +10,8 @@
 int main(int argc, char const *argv[])
 {
     Log() << "Starting...\n";
-    DBUSConnection dBusConnection;
-    Conf config(dBusConnection);
+    DBUSConnection sessionDBusConnection(DBUS_BUS_SESSION);
+    Conf config(sessionDBusConnection);
     Sensor sensor(config);
     Backlight backlight(config);
     KeyboardLed keyboardLed(config);

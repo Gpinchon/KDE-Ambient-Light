@@ -18,6 +18,7 @@ public:
     std::string sensorPath;
     float sensorScale = 0;
     float sensorOffset = 0;
+    float sensorSmoothing = 0;
     int sensorDelay = 0;
 
     bool backlightEnabled = true;

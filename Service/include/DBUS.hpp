@@ -29,7 +29,7 @@ public:
 class DBUSConnection : public DBUSObject<::DBusConnection *>
 {
 public:
-    DBUSConnection();
+    DBUSConnection(const DBusBusType &a_Type);
     ~DBUSConnection();
     ::DBusMessage *Send(::DBusMessage *) const;
 };

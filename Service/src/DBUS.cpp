@@ -10,16 +10,16 @@ DBusError GetDBUSError()
     return error;
 }
 
-auto GetDBUSConnection()
+auto GetDBUSConnection(const DBusBusType &a_Type)
 {
     auto dbus_error = GetDBUSError();
-    auto dbus_conn = dbus_bus_get(DBUS_BUS_SESSION, &dbus_error);
+    auto dbus_conn = dbus_bus_get(a_Type, &dbus_error);
     Log() << "Connected to D-Bus as \"" << dbus_bus_get_unique_name(dbus_conn) << "\"." << std::endl;
     return dbus_conn;
 }
 
-DBUSConnection::DBUSConnection()
-    : DBUSObject(GetDBUSConnection())
+DBUSConnection::DBUSConnection(const DBusBusType &a_Type)
+    : DBUSObject(GetDBUSConnection(a_Type))
 {
 }
 
