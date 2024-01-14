@@ -13,7 +13,7 @@ constexpr auto DefaultConfUpdateDelay = 5000;
 
 constexpr auto DefaultSensorPath = "/sys/bus/iio/devices/iio:device0";
 constexpr auto DefaultSensorDelay = 500;
-constexpr auto DefaultSensorSmoothing = 10;
+constexpr auto DefaultSensorSmoothing = 1.5;
 
 constexpr auto DefaultBacklightEnabled = true;
 constexpr auto DefaultBacklightPath = "/sys/class/backlight/*";
