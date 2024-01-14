@@ -18,7 +18,7 @@ SensorPath      = /sys/bus/iio/devices/iio:device0
 //Light sensor lookups delay in milliseconds
 SensorDelay     = 500
 //Influences the smoothing of sensor lumen to brightness function
-//function is (1 - pow(lumen, smoothing))
+//function is pow(log(x), SensorSmoothing), it's then normalized
 SensorSmoothing = 10
 
 //Enable/Disables automatic backlight
