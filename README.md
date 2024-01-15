@@ -43,5 +43,7 @@ KeyboardLedMax   = 1
 MaxLuxBreakpoint = 1254.0
 ```
 
-# Dependencies
+# Building
+In order to build from source and install the service, simply run ./build_and_install.sh
+## Dependencies
 cmake, libc-dev, libcxx-dev, libdbus-1-dev, PkgConfig, FindPkgConfig.cmake
