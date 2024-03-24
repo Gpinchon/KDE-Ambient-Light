@@ -36,7 +36,7 @@ DBUSConnection::~DBUSConnection()
         a_Msg, DBUS_TIMEOUT_USE_DEFAULT,
         &dbus_error);
     if (dbus_error.message != nullptr)
-        throw std::runtime_error(dbus_error.message);
+        throw DBUSException(dbus_error.message);
     return dbus_msg;
 }
 

@@ -24,7 +24,7 @@ std::string exec(const std::string &a_Cmd)
 class NullBuffer : public std::streambuf
 {
 public:
-    int overflow(int c) { return c; }
+    int overflow(int c) final { return c; }
 };
 
 std::ostream &Log()

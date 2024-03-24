@@ -5,6 +5,31 @@
 
 class DBUSConnection;
 
+class PlasmaPowerSettings
+{
+public:
+    PlasmaPowerSettings();
+    float GetDisplayMaxBrightness() const;
+    float GetKeyboardMaxBrightness() const;
+    float GetDisplayACMaxBrightness() const;
+    float GetDisplayBATMaxBrightness() const;
+    float GetDisplayLowBATMaxBrightness() const;
+    float GetKeyboardACMaxBrightness() const;
+    float GetKeyboardBATMaxBrightness() const;
+    float GetKeyboardLowBATMaxBrightness() const;
+
+private:
+    bool _OnBattery() const;
+    bool _LowBattery() const;
+    float _GetBrightness(const std::string& a_ValName, const std::string& a_Cmd) const;
+    std::string _backlightACCmd;
+    std::string _backlightBATCmd;
+    std::string _backlightLowBATCmd;
+    std::string _keyboardACCmd;
+    std::string _keyboardBATCmd;
+    std::string _keyboardLowBATCmd;
+};
+
 class Conf
 {
 public:
@@ -37,6 +62,7 @@ public:
 
     DBUSConnection &dBusConnection;
 
-private:
     std::chrono::high_resolution_clock::time_point lastUpdate;
+
+    PlasmaPowerSettings powerSettings;
 };

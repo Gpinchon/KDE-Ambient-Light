@@ -5,6 +5,16 @@
 
 #include <dbus/dbus.h>
 
+class DBUSException : public std::exception
+{
+public:
+    explicit DBUSException(const std::string &a_Message) : _message("DBUS Exception : " + a_Message) {}
+    const char *what() const noexcept override { return _message.c_str(); };
+
+private:
+    const std::string _message;
+};
+
 template <typename T>
 class DBUSObject
 {
@@ -67,7 +77,7 @@ inline void DBUSReply::GetArgs(Args... a_Args)
     dbus_message_get_args(data, &error.data, a_Args..., DBUS_TYPE_INVALID);
     if (error.data.message != nullptr)
     {
-        throw std::runtime_error(std::string(error.data.name) + " : " + error.data.message);
+        throw DBUSException(std::string(error.data.name) + " : " + error.data.message);
     }
 }
 
@@ -78,6 +88,6 @@ inline void DBUSMethodCall::SetArgs(Args... a_Args)
     dbus_message_append_args(data, a_Args..., DBUS_TYPE_INVALID);
     if (error.data.message != nullptr)
     {
-        throw std::runtime_error(std::string(error.data.name) + " : " + error.data.message);
+        throw DBUSException(std::string(error.data.name) + " : " + error.data.message);
     }
 }
