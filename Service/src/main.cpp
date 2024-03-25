@@ -10,7 +10,7 @@
 int main(int argc, char const *argv[])
 {
     Log() << "Starting...\n";
-    DBUSConnection sessionDBusConnection(DBUS_BUS_SESSION);
+    DBUS::Connection sessionDBusConnection(DBUS_BUS_SESSION);
     Conf config(sessionDBusConnection);
     Sensor sensor(config);
     Backlight backlight(config);

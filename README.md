@@ -3,7 +3,7 @@ This service attempts to bring automatic backlight for KDE.
 It was originaly developped on a Yoga Pro 7 running OpenSUSE Tumbleweed with Plasma.
 It might not work on other laptops depending on your configuration. Please profide feedback if it doesn't.
 
-The max values for automatic brightness can be set using System Plasma's "Settings/Power Management". They're read from `~/.config/powermanagementprofilesrc`
+The max values for automatic brightness can be set using System Plasma's "Settings/Power Management". They're read from `~/.config/powermanagementprofilesrc` or from `~/.config/powerdevilsrc`
 
 The config file used for this service is located in `~/.config/ambient-light`
 If no config file is found the service generates it automatically using the default values.

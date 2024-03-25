@@ -17,18 +17,38 @@ constexpr auto DefaultSensorDelay = 500;
 constexpr auto DefaultSensorSmoothing = 1.5;
 
 constexpr auto DefaultBacklightEnabled = true;
-constexpr auto DefaultBacklightPath = "/sys/class/backlight/*";
 constexpr auto DefaultBacklightDelay = 32; // default update frequency is 30 times/sec
 constexpr auto DefaultBacklightMin = 0;
 constexpr auto DefaultBacklightMax = 1;
 
 constexpr auto DefaultKeyboardLedEnabled = true;
-constexpr auto DefaultKeyboardLedPath = "/sys/class/leds/platform::kbd_backlight/";
 constexpr auto DefaultKeyboardLedDelay = 1000;
 constexpr auto DefaultKeyboardLedMin = 0;
 constexpr auto DefaultKeyboardLedMax = 1;
 
 constexpr auto DefaultMaxLuxBreakpoint = 1254;
+
+enum class BatteryLevel {
+    Unknown,
+    None = 1,
+    Low = 3,
+    Critical = 4,
+    Normal = 6,
+    High = 7,
+    Full = 8,
+    MaxValue
+};
+
+enum class BatteryState {
+    Unknown,
+    Charging,
+    Discharging,
+    Empty,
+    FullyCharged,
+    PendingCharge,
+    PendingDischarge,
+    MaxValue
+};
 
 class ConfException : public std::exception
 {
@@ -69,16 +89,6 @@ std::filesystem::path GetConfigPath()
     return GetHomeDir() + "/.config/ambient-light";
 }
 
-std::string GetBatteryStatus()
-{
-    return exec("cat /sys/class/power_supply/BAT0/status");
-}
-
-std::string GetBatteryCapacityLevel()
-{
-    return exec("cat /sys/class/power_supply/BAT0/capacity_level");
-}
-
 PlasmaPowerSettings::PlasmaPowerSettings() {
     auto homeDir = GetHomeDir();
     auto configFileName = exec("kreadconfig5 --file " + homeDir + "/.config/powermanagementprofilesrc --group Migration --key MigratedProfilesToPlasma6 --default powermanagementprofilesrc");
@@ -94,15 +104,32 @@ PlasmaPowerSettings::PlasmaPowerSettings() {
 
 bool PlasmaPowerSettings::_LowBattery() const
 {
-    auto batteryCapacityLevel = GetBatteryCapacityLevel();
-    Log() << "Battery Capacity : " << batteryCapacityLevel << std::endl;
-    return (batteryCapacityLevel == "Critical\n" || batteryCapacityLevel == "Low\n");
+    DBUS::Connection dBusConnection(DBUS_BUS_SYSTEM);
+    DBUS::MethodCall methodCall("org.freedesktop.UPower",
+                              "/org/freedesktop/UPower/devices/battery_BAT0",
+                              DBUS_INTERFACE_PROPERTIES,
+                              "Get");
+    auto iFace = "org.freedesktop.UPower.Device";
+    auto property = "BatteryLevel";
+    methodCall.SetArgs(DBUS_TYPE_STRING, &iFace,
+                       DBUS_TYPE_STRING, &property);
+    DBUS::Reply reply(dBusConnection.Send(methodCall));
+    auto batteryLevel = BatteryLevel(std::any_cast<uint32_t>(reply.GetArgs().at(0)));
+    return batteryLevel == BatteryLevel::Low || batteryLevel== BatteryLevel::Critical;
 }
 
 bool PlasmaPowerSettings::_OnBattery() const {
-    auto batteryStatus = GetBatteryStatus();
-    Log() << "Battery Status : " << batteryStatus << std::endl;
-    return batteryStatus == "Discharging";
+    DBUS::Connection dBusConnection(DBUS_BUS_SYSTEM);
+    DBUS::MethodCall methodCall("org.freedesktop.UPower",
+                              "/org/freedesktop/UPower",
+                              DBUS_INTERFACE_PROPERTIES,
+                              "Get");
+    auto iFace = "org.freedesktop.UPower";
+    auto property = "OnBattery";
+    methodCall.SetArgs(DBUS_TYPE_STRING, &iFace,
+                       DBUS_TYPE_STRING, &property);
+    DBUS::Reply reply(dBusConnection.Send(methodCall));
+    return std::any_cast<bool>(reply.GetArgs().at(0));
 }
 
 float PlasmaPowerSettings::GetDisplayMaxBrightness() const {
@@ -185,17 +212,17 @@ std::string GetSensorPath()
     return "";
 }
 
-Conf::Conf(DBUSConnection &a_DBusConnection) : dBusConnection(a_DBusConnection)
+Conf::Conf(DBUS::Connection &a_DBusConnection) : dBusConnection(a_DBusConnection)
 {
     Log() << "Creating Conf\n";
     Update();
     {
-        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                   "brightnessMax");
-        DBUSReply reply(dBusConnection.Send(methodCall));
-        reply.GetArgs(DBUS_TYPE_INT32, &backlightScale);
+        DBUS::Reply reply(dBusConnection.Send(methodCall));
+        backlightScale = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 }
 
@@ -230,12 +257,12 @@ void Conf::Update()
     backlightMin = Config::Global().Get("BacklightMin", DefaultBacklightMin);
     backlightMax = powerSettings.GetDisplayMaxBrightness();
     {
-        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                   "brightnessMax");
-        DBUSReply reply(dBusConnection.Send(methodCall));
-        reply.GetArgs(DBUS_TYPE_INT32, &backlightScale);
+        DBUS::Reply reply(dBusConnection.Send(methodCall));
+        backlightScale = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
     keyboardLedEnabled = Config::Global().Get("KeyboardLedEnabled", DefaultKeyboardLedEnabled);
@@ -243,12 +270,12 @@ void Conf::Update()
     keyboardLedMin = Config::Global().Get("KeyboardLedMin", DefaultKeyboardLedMin);
     keyboardLedMax = powerSettings.GetKeyboardMaxBrightness();
     {
-        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
                                   "keyboardBrightnessMax");
-        DBUSReply reply(dBusConnection.Send(methodCall));
-        reply.GetArgs(DBUS_TYPE_INT32, &keyboardLedScale);
+        DBUS::Reply reply(dBusConnection.Send(methodCall));
+        keyboardLedScale = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
     loopDelay = confUpdateDelay;

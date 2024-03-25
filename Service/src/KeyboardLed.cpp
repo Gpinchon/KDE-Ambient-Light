@@ -14,19 +14,19 @@ void KeyboardLed::Update()
     int curBrightness = 0;
 
     {
-        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
                                   "keyboardBrightness");
-        DBUSReply reply(conf.dBusConnection.Send(methodCall));
-        reply.GetArgs(DBUS_TYPE_INT32, &curBrightness);
+        DBUS::Reply reply(conf.dBusConnection.Send(methodCall));
+        curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
     auto newBrightness = int(brightness * conf.keyboardLedScale);
     if (curBrightness == newBrightness)
         return;
     {
-        DBUSMethodCall methodCall("org.kde.Solid.PowerManagement",
+        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
                                   "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
                                   "setKeyboardBrightnessSilent");

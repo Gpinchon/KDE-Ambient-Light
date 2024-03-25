@@ -3,7 +3,9 @@
 #include <string>
 #include <chrono>
 
-class DBUSConnection;
+namespace DBUS {
+class Connection;
+}
 
 class PlasmaPowerSettings
 {
@@ -33,7 +35,7 @@ private:
 class Conf
 {
 public:
-    explicit Conf(DBUSConnection &a_DBusConnection);
+    explicit Conf(DBUS::Connection &a_DBusConnection);
     void Update();
 
     int loopDelay = 0;
@@ -60,7 +62,7 @@ public:
 
     float maxLuxBreakpoint = 0;
 
-    DBUSConnection &dBusConnection;
+    DBUS::Connection &dBusConnection;
 
     std::chrono::high_resolution_clock::time_point lastUpdate;
 
