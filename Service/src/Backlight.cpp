@@ -1,6 +1,7 @@
 #include <Backlight.hpp>
 #include <DBUS.hpp>
 #include <Conf.hpp>
+#include <ConfKeys.hpp>
 #include <Tools.hpp>
 
 #include <algorithm>
@@ -9,7 +10,7 @@ void Backlight::Update()
 {
     const auto now = std::chrono::high_resolution_clock::now();
     const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
-    if (!firstUpdate && delta < conf.backlightDelay)
+    if (!firstUpdate && delta < conf.Get(BacklightDelay, DefaultBacklightDelay))
         return;
     int curBrightness = 0;
 
@@ -22,7 +23,7 @@ void Backlight::Update()
         curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
-    auto newBrightness = int(brightness * conf.backlightScale);
+    auto newBrightness = int(brightness * conf.Get(BacklightScale, DefaultBacklightScale));
     newBrightness = curBrightness * 0.9f + newBrightness * 0.1f;
     if (curBrightness == newBrightness)
         return;
@@ -35,15 +36,17 @@ void Backlight::Update()
         conf.dBusConnection.Send(methodCall);
     }
     Log() << "Backlight brightness :\n"
-          << "Min Brightness   " << conf.backlightMin << "\n"
-          << "Max Brightness   " << conf.backlightMax << "\n"
-          << "Brightness Scale " << conf.backlightScale << "\n"
+          << "Min Brightness   " << conf.Get(BacklightMin, DefaultBacklightMin) << "\n"
+          << "Max Brightness   " << conf.Get(BacklightMax, DefaultBacklightMax) << "\n"
+          << "Brightness Scale " << conf.Get(BacklightScale, DefaultBacklightScale) << "\n"
           << "New Brightness   " << newBrightness << "\n"
           << "Brightness       " << brightness << std::endl;
     lastUpdate = std::chrono::high_resolution_clock::now();
     firstUpdate = false;
 }
-void Backlight::SetBrightness(const float &a_Value)
+void Backlight::SetBrightness(const double &a_Value)
 {
-    brightness = std::clamp(a_Value, conf.backlightMin, conf.backlightMax);
+    brightness = float(std::clamp(a_Value,
+        conf.Get(BacklightMin, DefaultBacklightMin),
+        conf.Get(BacklightMax, DefaultBacklightMax)));
 }

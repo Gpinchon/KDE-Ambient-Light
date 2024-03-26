@@ -1,6 +1,7 @@
 #include <KeyboardLed.hpp>
 #include <DBUS.hpp>
 #include <Conf.hpp>
+#include <ConfKeys.hpp>
 #include <Tools.hpp>
 
 #include <algorithm>
@@ -9,7 +10,7 @@ void KeyboardLed::Update()
 {
     const auto now = std::chrono::high_resolution_clock::now();
     const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
-    if (!firstUpdate && delta < conf.sensorDelay)
+    if (!firstUpdate && delta < conf.Get(KeyboardLedDelay, DefaultKeyboardLedDelay))
         return;
     int curBrightness = 0;
 
@@ -22,7 +23,7 @@ void KeyboardLed::Update()
         curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
-    auto newBrightness = int(brightness * conf.keyboardLedScale);
+    auto newBrightness = int(brightness * conf.Get(KeyboardLedScale, DefaultKeyboardLedScale));
     if (curBrightness == newBrightness)
         return;
     {
@@ -34,16 +35,18 @@ void KeyboardLed::Update()
         conf.dBusConnection.Send(methodCall);
     }
     Log() << "Keyboard brightness :\n"
-          << "Min Brightness   " << conf.keyboardLedMin << "\n"
-          << "Max Brightness   " << conf.keyboardLedMax << "\n"
-          << "Brightness Scale " << conf.keyboardLedScale << "\n"
+          << "Min Brightness   " << conf.Get(KeyboardLedMin, DefaultKeyboardLedMin) << "\n"
+          << "Max Brightness   " << conf.Get(KeyboardLedMax, DefaultKeyboardLedMax) << "\n"
+          << "Brightness Scale " << conf.Get(KeyboardLedScale, DefaultKeyboardLedScale) << "\n"
           << "New Brightness   " << newBrightness << "\n"
           << "Brightness       " << brightness << std::endl;
     lastUpdate = std::chrono::high_resolution_clock::now();
     firstUpdate = false;
 }
 
-void KeyboardLed::SetBrightness(const float &a_Value)
+void KeyboardLed::SetBrightness(const double &a_Value)
 {
-    brightness = std::clamp(a_Value, conf.keyboardLedMin, conf.keyboardLedMax);
+    brightness = float(std::clamp(a_Value,
+        conf.Get(KeyboardLedMin, DefaultKeyboardLedMin),
+        conf.Get(KeyboardLedMax, DefaultKeyboardLedMax)));
 }

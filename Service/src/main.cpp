@@ -4,6 +4,7 @@
 #include <Sensor.hpp>
 #include <Tools.hpp>
 #include <Conf.hpp>
+#include <ConfKeys.hpp>
 
 #include <thread>
 
@@ -16,18 +17,18 @@ int main(int argc, char const *argv[])
     Backlight backlight(config);
     KeyboardLed keyboardLed(config);
 
-    Log() << "SensorPath : " << config.sensorPath << "\n";
+    Log() << "SensorPath : " << config.Get(SensorPath, DefaultSensorPath) << "\n";
     while (true)
     {
         config.Update();
         sensor.Update();
         auto brightness = sensor.GetBrightness();
-        if (config.backlightEnabled)
+        if (config.Get(BacklightEnabled, DefaultBacklightEnabled) != 0)
         {
             backlight.SetBrightness(brightness);
             backlight.Update();
         }
-        if (config.keyboardLedEnabled)
+        if (config.Get(KeyboardLedEnabled, DefaultKeyboardLedEnabled) != 0)
         {
             keyboardLed.SetBrightness(1 - brightness);
             keyboardLed.Update();

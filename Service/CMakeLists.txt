@@ -30,6 +30,7 @@ set(SERVICE_SRC
 set(SERVICE_INCLUDE
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Backlight.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Conf.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ConfKeys.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/DBUS.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/KeyboardLed.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Sensor.hpp
