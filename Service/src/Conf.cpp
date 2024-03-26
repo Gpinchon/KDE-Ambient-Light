@@ -146,8 +146,10 @@ void Conf::Update()
     Get(MaxLuxBreakpoint, DefaultMaxLuxBreakpoint);
 
     auto sensorPath = Get(SensorPath, std::string(DefaultSensorPath));
-    if (!SensorPathValid(sensorPath))
-        throw std::runtime_error("Invalid sensor path");
+    if (!SensorPathValid(sensorPath)) {
+        Error() << "Invalid sensor path : " << sensorPath << std::endl;
+        throw ConfException("Invalid sensor path");
+    }
     auto sensorDelay = Get(SensorDelay, DefaultSensorDelay);
     Get(SensorSmoothing, DefaultSensorSmoothing);
     std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;

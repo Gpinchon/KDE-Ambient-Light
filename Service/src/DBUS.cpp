@@ -4,7 +4,6 @@
 #include <dbus/dbus.h>
 
 namespace DBUS {
-
 DBusError GetDBUSError()
 {
     DBusError error;
@@ -37,8 +36,10 @@ Connection::~Connection()
         data,
         a_Msg, DBUS_TIMEOUT_USE_DEFAULT,
         &dbus_error);
-    if (dbus_error.message != nullptr)
+    if (dbus_error.message != nullptr) {
+        ::Error() << dbus_error.message << std::endl;
         throw Exception(dbus_error.message);
+    }
     return dbus_msg;
 }
 
