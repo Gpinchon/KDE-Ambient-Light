@@ -15,6 +15,12 @@ public:
     explicit Conf(DBUS::Connection &a_DBusConnection);
     void Update();
 
+    double backlightMax = 1;
+    double backlightScale = 1;
+    double keyboardLedMax = 1;
+    double keyboardLedScale = 1;
+    double sensorScale = 1;
+    double sensorOffset = 0;
     int loopDelay = 5000;
 
     DBUS::Connection &dBusConnection;

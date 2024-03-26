@@ -23,7 +23,7 @@ void Backlight::Update()
         curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
-    auto newBrightness = int(brightness * conf.Get(BacklightScale, DefaultBacklightScale));
+    auto newBrightness = int(brightness * conf.backlightScale);
     newBrightness = curBrightness * 0.9f + newBrightness * 0.1f;
     if (curBrightness == newBrightness)
         return;
@@ -37,8 +37,8 @@ void Backlight::Update()
     }
     Log() << "Backlight brightness :\n"
           << "Min Brightness   " << conf.Get(BacklightMin, DefaultBacklightMin) << "\n"
-          << "Max Brightness   " << conf.Get(BacklightMax, DefaultBacklightMax) << "\n"
-          << "Brightness Scale " << conf.Get(BacklightScale, DefaultBacklightScale) << "\n"
+          << "Max Brightness   " << conf.backlightMax << "\n"
+          << "Brightness Scale " << conf.backlightScale << "\n"
           << "New Brightness   " << newBrightness << "\n"
           << "Brightness       " << brightness << std::endl;
     lastUpdate = std::chrono::high_resolution_clock::now();
@@ -48,5 +48,5 @@ void Backlight::SetBrightness(const double &a_Value)
 {
     brightness = float(std::clamp(a_Value,
         conf.Get(BacklightMin, DefaultBacklightMin),
-        conf.Get(BacklightMax, DefaultBacklightMax)));
+        conf.backlightMax));
 }

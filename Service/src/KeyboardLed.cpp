@@ -23,7 +23,7 @@ void KeyboardLed::Update()
         curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
-    auto newBrightness = int(brightness * conf.Get(KeyboardLedScale, DefaultKeyboardLedScale));
+    auto newBrightness = int(brightness * conf.keyboardLedScale);
     if (curBrightness == newBrightness)
         return;
     {
@@ -36,8 +36,8 @@ void KeyboardLed::Update()
     }
     Log() << "Keyboard brightness :\n"
           << "Min Brightness   " << conf.Get(KeyboardLedMin, DefaultKeyboardLedMin) << "\n"
-          << "Max Brightness   " << conf.Get(KeyboardLedMax, DefaultKeyboardLedMax) << "\n"
-          << "Brightness Scale " << conf.Get(KeyboardLedScale, DefaultKeyboardLedScale) << "\n"
+          << "Max Brightness   " << conf.keyboardLedMax << "\n"
+          << "Brightness Scale " << conf.keyboardLedScale << "\n"
           << "New Brightness   " << newBrightness << "\n"
           << "Brightness       " << brightness << std::endl;
     lastUpdate = std::chrono::high_resolution_clock::now();
@@ -48,5 +48,5 @@ void KeyboardLed::SetBrightness(const double &a_Value)
 {
     brightness = float(std::clamp(a_Value,
         conf.Get(KeyboardLedMin, DefaultKeyboardLedMin),
-        conf.Get(KeyboardLedMax, DefaultKeyboardLedMax)));
+        conf.keyboardLedMax));
 }

@@ -150,12 +150,8 @@ void Conf::Update()
         throw std::runtime_error("Invalid sensor path");
     auto sensorDelay = Get(SensorDelay, DefaultSensorDelay);
     Get(SensorSmoothing, DefaultSensorSmoothing);
-    float sensorScale = 0;
-    float sensorOffset = 0;
     std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
-    Set(SensorScale, sensorScale);
-    Set(SensorOffset, sensorOffset);
 
     auto backlightEnabled = Get(BacklightEnabled, DefaultBacklightEnabled) != 0;
     auto backlightDelay = Get(BacklightDelay, DefaultBacklightDelay);
@@ -169,7 +165,7 @@ void Conf::Update()
                                   "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
                                   "brightnessMax");
         DBUS::Reply reply(dBusConnection.Send(methodCall));
-        Set(KeyboardLedScale, std::any_cast<int32_t>(reply.GetArgs().front()));
+        backlightScale = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
     auto keyboardLedEnabled = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabled) != 0;
@@ -184,22 +180,22 @@ void Conf::Update()
                                   "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
                                   "keyboardBrightnessMax");
         DBUS::Reply reply(dBusConnection.Send(methodCall));
-        Set(KeyboardLedScale, std::any_cast<int32_t>(reply.GetArgs().front()));
+        keyboardLedScale = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
     if (OnBattery()) {
         if (OnLowBattery()) {
-            Set(BacklightMax, backlightMaxBATLow);
-            Set(KeyboardLedMax, keyboardLedMaxBATLow);
+            backlightMax = backlightMaxBATLow;
+            keyboardLedMax = keyboardLedMaxBATLow;
         }
         else {
-            Set(BacklightMax, backlightMaxBAT);
-            Set(KeyboardLedMax, keyboardLedMaxBAT);
+            backlightMax = backlightMaxBAT;
+            keyboardLedMax = keyboardLedMaxBAT;
         }
     }
     else { // we're connected to AC
-        Set(BacklightMax, backlightMaxAC);
-        Set(KeyboardLedMax, keyboardLedMaxAC);
+        backlightMax = backlightMaxAC;
+        keyboardLedMax = keyboardLedMaxAC;
     }
 
     loopDelay = int(confUpdateDelay);

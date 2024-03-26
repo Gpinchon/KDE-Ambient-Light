@@ -15,7 +15,7 @@ void Sensor::Update()
         return;
     std::ifstream(conf.Get(SensorPath, DefaultSensorPath) + "/in_illuminance_raw") >> illuminance;
     Log() << "Get sensor illuminance : " << illuminance << "\n";
-    illuminance = illuminance * conf.Get(SensorScale, DefaultSensorScale) + conf.Get(SensorOffset, DefaultSensorOffset);
+    illuminance = illuminance * conf.sensorScale + conf.sensorOffset;
     lastUpdate = std::chrono::high_resolution_clock::now();
     firstUpdate = false;
 }
