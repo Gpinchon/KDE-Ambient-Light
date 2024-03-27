@@ -129,11 +129,6 @@ Conf::Conf(DBUS::Connection &a_DBusConnection) : dBusConnection(a_DBusConnection
 
 void Conf::Update()
 {
-    const auto now = std::chrono::high_resolution_clock::now();
-    const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
-    auto confUpdateDelay = Get(ConfUpdateDelay, DefaultConfUpdateDelay);
-    if (delta < confUpdateDelay)
-        return;
     auto configPath = std::filesystem::absolute(GetConfigPath());
     Log() << "Config Path : " << configPath << "\n";
     bool confFileExists = std::filesystem::exists(configPath);
@@ -200,8 +195,7 @@ void Conf::Update()
         keyboardLedMax = keyboardLedMaxAC;
     }
 
-    loopDelay = int(confUpdateDelay);
-    loopDelay = std::min(loopDelay, int(sensorDelay));
+    loopDelay = sensorDelay;
     if (backlightEnabled)
         loopDelay = std::min(loopDelay, int(backlightDelay));
     if (keyboardLedEnabled)
