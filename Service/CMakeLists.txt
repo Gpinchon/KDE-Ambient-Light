@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 
-set(FETCHCONTENT_FULLY_DISCONNECTED on)
+set(FETCHCONTENT_FULLY_DISCONNECTED off)
 
 include(FetchContent)
 
