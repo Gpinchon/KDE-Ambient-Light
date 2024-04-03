@@ -21,21 +21,30 @@ DefaultSensorSmoothing = 1.5
 DefaultBacklightEnabled = true
 //Backlight update delay in milliseconds, default update frequency is 30 times/sec
 DefaultBacklightDelay = 32
-//Backlight minimum value
-DefaultBacklightMin = 0
+//Backlight minimum value on AC
+DefaultBacklightMinAC = 0
+//Backlight minimum value on battery
+DefaultBacklightMinBAT = 0
+//Backlight minimum value on low battery
+DefaultBacklightMinBATLow = 0
+//Backlight maximum value on AC
+DefaultBacklightMaxAC = 1
 //Backlight maximum value on battery
 DefaultBacklightMaxBAT = 1
 //Backlight maximum value on low battery
 DefaultBacklightMaxBATLow = 1
-//Backlight maximum value on AC
-DefaultBacklightMaxAC = 1
+
 
 //Enable/Disables automatic keyboard LED
-DefaultKeyboardLedEnabled = 1
+DefaultKeyboardLedEnabled = true
 //Keyboard LED update delay in milliseconds, default update frequency is 1 times/sec
 DefaultKeyboardLedDelay = 1000
-//Keyboard LED minimum value
-DefaultKeyboardLedMin = 0
+//Keyboard LED minimum value on AC
+DefaultKeyboardLedMinAC = 0
+//Keyboard LED minimum value on battery
+DefaultKeyboardLedMinBAT = 0
+//Keyboard LED minimum value on low battery
+DefaultKeyboardLedMinBATLow = 0
 //Keyboard LED maximum value on battery
 DefaultKeyboardLedMaxBAT = 1
 //Keyboard LED maximum value on low battery
