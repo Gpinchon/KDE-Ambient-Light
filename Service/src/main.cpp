@@ -8,7 +8,7 @@
 
 #include <thread>
 
-int main(int argc, char const* argv[])
+int main(int, char const*[])
 {
     Log() << "Starting...\n";
     DBUS::Connection sessionDBusConnection(DBUS_BUS_SESSION);
