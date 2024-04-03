@@ -1,7 +1,7 @@
-#include <Sensor.hpp>
 #include <Conf.hpp>
-#include <ConfKeys.hpp>
 #include <DBUS.hpp>
+#include <Sensor.hpp>
+#include <ServiceConfKeys.hpp>
 #include <Tools.hpp>
 
 #include <cmath>
@@ -9,14 +9,14 @@
 
 void Sensor::Update()
 {
-    const auto now = std::chrono::high_resolution_clock::now();
+    const auto now   = std::chrono::high_resolution_clock::now();
     const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
     if (!firstUpdate && delta < conf.Get(SensorDelay, DefaultSensorDelay))
         return;
     std::ifstream(conf.Get(SensorPath, DefaultSensorPath) + "/in_illuminance_raw") >> illuminance;
     Log() << "Get sensor illuminance : " << illuminance << "\n";
     illuminance = illuminance * conf.sensorScale + conf.sensorOffset;
-    lastUpdate = std::chrono::high_resolution_clock::now();
+    lastUpdate  = std::chrono::high_resolution_clock::now();
     firstUpdate = false;
 }
 
@@ -36,9 +36,9 @@ auto NormalizeValue(float a_X, float a_MinX, float a_MaxX, float a_NewMin, float
 float Sensor::GetBrightness() const
 {
     auto maxLuxBreakpoint = float(conf.Get(MaxLuxBreakpoint, DefaultMaxLuxBreakpoint));
-    auto sensorSmoothing = conf.Get(SensorSmoothing, DefaultSensorSmoothing);
-    auto x = std::min(illuminance, maxLuxBreakpoint);
-    x = NormalizeValue(x, 0, maxLuxBreakpoint, FuncMinValue, FuncMaxValue);
+    auto sensorSmoothing  = conf.Get(SensorSmoothing, DefaultSensorSmoothing);
+    auto x                = std::min(illuminance, maxLuxBreakpoint);
+    x                     = NormalizeValue(x, 0, maxLuxBreakpoint, FuncMinValue, FuncMaxValue);
     if (illuminance > 0)
         return NormalizeValue(
             GetFuncValue(x, sensorSmoothing),

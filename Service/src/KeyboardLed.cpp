@@ -1,7 +1,7 @@
 #include <Conf.hpp>
-#include <ConfKeys.hpp>
 #include <DBUS.hpp>
 #include <KeyboardLed.hpp>
+#include <ServiceConfKeys.hpp>
 #include <Tools.hpp>
 
 #include <algorithm>

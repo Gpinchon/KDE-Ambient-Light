@@ -30,7 +30,6 @@ set(SERVICE_SRC
 set(SERVICE_INCLUDE
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Backlight.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Conf.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/ConfKeys.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/DBUS.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/KeyboardLed.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Sensor.hpp
@@ -48,9 +47,10 @@ target_include_directories(ambient-light PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 target_link_directories(ambient-light PUBLIC
   ${DBUS_LIBRARY_DIRS})
-target_link_libraries(ambient-light
+target_link_libraries(ambient-light PRIVATE
   ${DBUS_LIBRARIES}
-  Config)
+  Config
+  ServiceConfigKeys)
 
 add_custom_command(
   TARGET ambient-light POST_BUILD

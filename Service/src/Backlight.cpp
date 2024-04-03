@@ -1,7 +1,7 @@
 #include <Backlight.hpp>
 #include <Conf.hpp>
-#include <ConfKeys.hpp>
 #include <DBUS.hpp>
+#include <ServiceConfKeys.hpp>
 #include <Tools.hpp>
 
 #include <algorithm>
