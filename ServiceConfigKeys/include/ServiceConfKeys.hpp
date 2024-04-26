@@ -4,23 +4,27 @@ constexpr auto SensorPath      = "SensorPath";
 constexpr auto SensorDelay     = "SensorDelay";
 constexpr auto SensorSmoothing = "SensorSmoothing";
 
-constexpr auto BacklightEnabled   = "BacklightEnabled";
-constexpr auto BacklightDelay     = "BacklightDelay";
-constexpr auto BacklightMinAC     = "BacklightMinAC";
-constexpr auto BacklightMinBAT    = "BacklightMinBAT";
-constexpr auto BacklightMinBATLow = "BacklightMinBATLow";
-constexpr auto BacklightMaxAC     = "BacklightMaxAC";
-constexpr auto BacklightMaxBAT    = "BacklightMaxBAT";
-constexpr auto BacklightMaxBATLow = "BacklightMaxBATLow";
+constexpr auto BacklightDelay         = "BacklightDelay";
+constexpr auto BacklightEnabledAC     = "BacklightEnabledAC";
+constexpr auto BacklightEnabledBAT    = "BacklightEnabledBAT";
+constexpr auto BacklightEnabledBATLow = "BacklightEnabledBATLow";
+constexpr auto BacklightMinAC         = "BacklightMinAC";
+constexpr auto BacklightMinBAT        = "BacklightMinBAT";
+constexpr auto BacklightMinBATLow     = "BacklightMinBATLow";
+constexpr auto BacklightMaxAC         = "BacklightMaxAC";
+constexpr auto BacklightMaxBAT        = "BacklightMaxBAT";
+constexpr auto BacklightMaxBATLow     = "BacklightMaxBATLow";
 
-constexpr auto KeyboardLedEnabled   = "KeyboardLedEnabled";
-constexpr auto KeyboardLedDelay     = "KeyboardLedDelay";
-constexpr auto KeyboardLedMinAC     = "KeyboardLedMinAC";
-constexpr auto KeyboardLedMinBAT    = "KeyboardLedMinBAT";
-constexpr auto KeyboardLedMinBATLow = "KeyboardLedMinBATLow";
-constexpr auto KeyboardLedMaxAC     = "KeyboardLedMaxAC";
-constexpr auto KeyboardLedMaxBAT    = "KeyboardLedMaxBAT";
-constexpr auto KeyboardLedMaxBATLow = "KeyboardLedMaxBATLow";
+constexpr auto KeyboardLedDelay         = "KeyboardLedDelay";
+constexpr auto KeyboardLedEnabledAC     = "KeyboardLedEnabledAC";
+constexpr auto KeyboardLedEnabledBAT    = "KeyboardLedEnabledBAT";
+constexpr auto KeyboardLedEnabledBATLow = "KeyboardLedEnabledBATLow";
+constexpr auto KeyboardLedMinAC         = "KeyboardLedMinAC";
+constexpr auto KeyboardLedMinBAT        = "KeyboardLedMinBAT";
+constexpr auto KeyboardLedMinBATLow     = "KeyboardLedMinBATLow";
+constexpr auto KeyboardLedMaxAC         = "KeyboardLedMaxAC";
+constexpr auto KeyboardLedMaxBAT        = "KeyboardLedMaxBAT";
+constexpr auto KeyboardLedMaxBATLow     = "KeyboardLedMaxBATLow";
 
 constexpr auto MaxLuxBreakpoint = "MaxLuxBreakpoint";
 

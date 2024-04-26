@@ -152,9 +152,9 @@ void Conf::Update()
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
     auto backlightDelay         = Get(BacklightDelay, DefaultBacklightDelay);
-    auto backlightEnabledAC     = Get(BacklightEnabled, DefaultBacklightEnabledAC) != 0;
-    auto backlightEnabledBAT    = Get(BacklightEnabled, DefaultBacklightEnabledBAT) != 0;
-    auto backlightEnabledBATLow = Get(BacklightEnabled, DefaultBacklightEnabledBATLow) != 0;
+    auto backlightEnabledAC     = Get(BacklightEnabledAC, DefaultBacklightEnabledAC) != 0;
+    auto backlightEnabledBAT    = Get(BacklightEnabledBAT, DefaultBacklightEnabledBAT) != 0;
+    auto backlightEnabledBATLow = Get(BacklightEnabledBATLow, DefaultBacklightEnabledBATLow) != 0;
     auto backlightMinAC         = Get(BacklightMinAC, DefaultBacklightMinAC);
     auto backlightMinBAT        = Get(BacklightMinBAT, DefaultBacklightMinBAT);
     auto backlightMinBATLow     = Get(BacklightMinBATLow, DefaultBacklightMinBATLow);
@@ -171,9 +171,9 @@ void Conf::Update()
     }
 
     auto keyboardLedDelay         = Get(KeyboardLedDelay, DefaultKeyboardLedDelay);
-    auto keyboardLedEnabledAC     = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabledAC) != 0;
-    auto keyboardLedEnabledBAT    = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabledBAT) != 0;
-    auto keyboardLedEnabledBATLow = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabledBATLow) != 0;
+    auto keyboardLedEnabledAC     = Get(KeyboardLedEnabledAC, DefaultKeyboardLedEnabledAC) != 0;
+    auto keyboardLedEnabledBAT    = Get(KeyboardLedEnabledBAT, DefaultKeyboardLedEnabledBAT) != 0;
+    auto keyboardLedEnabledBATLow = Get(KeyboardLedEnabledBATLow, DefaultKeyboardLedEnabledBATLow) != 0;
     auto keyboardLedMinAC         = Get(KeyboardLedMinAC, DefaultKeyboardLedMinAC);
     auto keyboardLedMinBAT        = Get(KeyboardLedMinBAT, DefaultKeyboardLedMinBAT);
     auto keyboardLedMinBATLow     = Get(KeyboardLedMinBATLow, DefaultKeyboardLedMinBATLow);
