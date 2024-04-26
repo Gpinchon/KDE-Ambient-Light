@@ -14,9 +14,11 @@ public:
     explicit Conf(DBUS::Connection& a_DBusConnection);
     void Update();
 
+    bool backlightEnabled   = true;
     double backlightMin     = 0;
     double backlightMax     = 1;
     double backlightScale   = 1;
+    bool keyboardLedEnabled = true;
     double keyboardLedMin   = 0;
     double keyboardLedMax   = 1;
     double keyboardLedScale = 1;

@@ -151,14 +151,16 @@ void Conf::Update()
     std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
-    auto backlightEnabled   = Get(BacklightEnabled, DefaultBacklightEnabled) != 0;
-    auto backlightDelay     = Get(BacklightDelay, DefaultBacklightDelay);
-    auto backlightMinAC     = Get(BacklightMinAC, DefaultBacklightMinAC);
-    auto backlightMinBAT    = Get(BacklightMinBAT, DefaultBacklightMinBAT);
-    auto backlightMinBATLow = Get(BacklightMinBATLow, DefaultBacklightMinBATLow);
-    auto backlightMaxAC     = Get(BacklightMaxAC, DefaultBacklightMaxAC);
-    auto backlightMaxBAT    = Get(BacklightMaxBAT, DefaultBacklightMaxBAT);
-    auto backlightMaxBATLow = Get(BacklightMaxBATLow, DefaultBacklightMaxBATLow);
+    auto backlightDelay         = Get(BacklightDelay, DefaultBacklightDelay);
+    auto backlightEnabledAC     = Get(BacklightEnabled, DefaultBacklightEnabledAC) != 0;
+    auto backlightEnabledBAT    = Get(BacklightEnabled, DefaultBacklightEnabledBAT) != 0;
+    auto backlightEnabledBATLow = Get(BacklightEnabled, DefaultBacklightEnabledBATLow) != 0;
+    auto backlightMinAC         = Get(BacklightMinAC, DefaultBacklightMinAC);
+    auto backlightMinBAT        = Get(BacklightMinBAT, DefaultBacklightMinBAT);
+    auto backlightMinBATLow     = Get(BacklightMinBATLow, DefaultBacklightMinBATLow);
+    auto backlightMaxAC         = Get(BacklightMaxAC, DefaultBacklightMaxAC);
+    auto backlightMaxBAT        = Get(BacklightMaxBAT, DefaultBacklightMaxBAT);
+    auto backlightMaxBATLow     = Get(BacklightMaxBATLow, DefaultBacklightMaxBATLow);
     {
         DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
@@ -168,14 +170,16 @@ void Conf::Update()
         backlightScale = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
-    auto keyboardLedEnabled   = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabled) != 0;
-    auto keyboardLedDelay     = Get(KeyboardLedDelay, DefaultKeyboardLedDelay);
-    auto keyboardLedMinAC     = Get(KeyboardLedMinAC, DefaultKeyboardLedMinAC);
-    auto keyboardLedMinBAT    = Get(KeyboardLedMinBAT, DefaultKeyboardLedMinBAT);
-    auto keyboardLedMinBATLow = Get(KeyboardLedMinBATLow, DefaultKeyboardLedMinBATLow);
-    auto keyboardLedMaxAC     = Get(KeyboardLedMaxAC, DefaultKeyboardLedMaxAC);
-    auto keyboardLedMaxBAT    = Get(KeyboardLedMaxBAT, DefaultKeyboardLedMaxBAT);
-    auto keyboardLedMaxBATLow = Get(KeyboardLedMaxBATLow, DefaultKeyboardLedMaxBATLow);
+    auto keyboardLedDelay         = Get(KeyboardLedDelay, DefaultKeyboardLedDelay);
+    auto keyboardLedEnabledAC     = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabledAC) != 0;
+    auto keyboardLedEnabledBAT    = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabledBAT) != 0;
+    auto keyboardLedEnabledBATLow = Get(KeyboardLedEnabled, DefaultKeyboardLedEnabledBATLow) != 0;
+    auto keyboardLedMinAC         = Get(KeyboardLedMinAC, DefaultKeyboardLedMinAC);
+    auto keyboardLedMinBAT        = Get(KeyboardLedMinBAT, DefaultKeyboardLedMinBAT);
+    auto keyboardLedMinBATLow     = Get(KeyboardLedMinBATLow, DefaultKeyboardLedMinBATLow);
+    auto keyboardLedMaxAC         = Get(KeyboardLedMaxAC, DefaultKeyboardLedMaxAC);
+    auto keyboardLedMaxBAT        = Get(KeyboardLedMaxBAT, DefaultKeyboardLedMaxBAT);
+    auto keyboardLedMaxBATLow     = Get(KeyboardLedMaxBATLow, DefaultKeyboardLedMaxBATLow);
     {
         DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
@@ -187,21 +191,27 @@ void Conf::Update()
 
     if (OnBattery()) {
         if (OnLowBattery()) {
-            backlightMin   = backlightMinBATLow;
-            backlightMax   = backlightMaxBATLow;
-            keyboardLedMin = keyboardLedMinBATLow;
-            keyboardLedMax = keyboardLedMaxBATLow;
+            backlightEnabled   = backlightEnabledBATLow;
+            keyboardLedEnabled = keyboardLedEnabledBATLow;
+            backlightMin       = backlightMinBATLow;
+            backlightMax       = backlightMaxBATLow;
+            keyboardLedMin     = keyboardLedMinBATLow;
+            keyboardLedMax     = keyboardLedMaxBATLow;
         } else {
-            backlightMin   = backlightMinBAT;
-            backlightMax   = backlightMaxBAT;
-            keyboardLedMin = keyboardLedMinBAT;
-            keyboardLedMax = keyboardLedMaxBAT;
+            backlightEnabled   = backlightEnabledBAT;
+            keyboardLedEnabled = keyboardLedEnabledBAT;
+            backlightMin       = backlightMinBAT;
+            backlightMax       = backlightMaxBAT;
+            keyboardLedMin     = keyboardLedMinBAT;
+            keyboardLedMax     = keyboardLedMaxBAT;
         }
     } else { // we're connected to AC
-        backlightMin   = backlightMinAC;
-        backlightMax   = backlightMaxAC;
-        keyboardLedMin = keyboardLedMinAC;
-        keyboardLedMax = keyboardLedMaxAC;
+        backlightEnabled   = backlightEnabledAC;
+        keyboardLedEnabled = keyboardLedEnabledAC;
+        backlightMin       = backlightMinAC;
+        backlightMax       = backlightMaxAC;
+        keyboardLedMin     = keyboardLedMinAC;
+        keyboardLedMax     = keyboardLedMaxAC;
     }
 
     loopDelay = int(sensorDelay);

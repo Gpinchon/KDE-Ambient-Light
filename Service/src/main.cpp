@@ -22,11 +22,11 @@ int main(int, char const*[])
     while (true) {
         sensor.Update();
         auto brightness = sensor.GetBrightness();
-        if (config.Get(BacklightEnabled, DefaultBacklightEnabled) != 0) {
+        if (config.backlightEnabled != 0) {
             backlight.SetBrightness(brightness);
             backlight.Update();
         }
-        if (config.Get(KeyboardLedEnabled, DefaultKeyboardLedEnabled) != 0) {
+        if (config.keyboardLedEnabled != 0) {
             keyboardLed.SetBrightness(1 - brightness);
             keyboardLed.Update();
         }
