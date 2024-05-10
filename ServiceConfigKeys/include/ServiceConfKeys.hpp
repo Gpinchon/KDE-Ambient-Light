@@ -1,5 +1,7 @@
 #pragma once
 
+constexpr auto ConfigUpdateDelay = "ConfigUpdateDelay";
+
 constexpr auto SensorPath      = "SensorPath";
 constexpr auto SensorDelay     = "SensorDelay";
 constexpr auto SensorSmoothing = "SensorSmoothing";
@@ -27,6 +29,8 @@ constexpr auto KeyboardLedMaxBAT        = "KeyboardLedMaxBAT";
 constexpr auto KeyboardLedMaxBATLow     = "KeyboardLedMaxBATLow";
 
 constexpr auto MaxLuxBreakpoint = "MaxLuxBreakpoint";
+
+constexpr auto DefaultConfigUpdateDelay = 5000;
 
 constexpr auto DefaultSensorPath      = "/sys/bus/iio/devices/iio:device0";
 constexpr auto DefaultSensorDelay     = 500;

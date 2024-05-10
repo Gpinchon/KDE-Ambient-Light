@@ -118,19 +118,6 @@ Conf::Conf(DBUS::Connection& a_DBusConnection)
     : dBusConnection(a_DBusConnection)
 {
     Log() << "Creating Conf\n";
-    Update();
-    {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-            "brightnessMax");
-        DBUS::Reply reply(dBusConnection.Send(methodCall));
-        Set("BacklightScale", std::any_cast<int32_t>(reply.GetArgs().front()));
-    }
-}
-
-void Conf::Update()
-{
     auto configPath = std::filesystem::absolute(GetConfigPath());
     Log() << "Config Path : " << configPath << "\n";
     bool confFileExists = std::filesystem::exists(configPath);
@@ -139,6 +126,9 @@ void Conf::Update()
     else {
         Error() << "No config file, using default settings and saving them.\n";
     }
+
+    updateDelay = int(Get(ConfigUpdateDelay, DefaultConfigUpdateDelay));
+
     Get(MaxLuxBreakpoint, DefaultMaxLuxBreakpoint);
 
     auto sensorPath = Get(SensorPath, std::string(DefaultSensorPath));
@@ -151,16 +141,7 @@ void Conf::Update()
     std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
-    auto backlightDelay         = Get(BacklightDelay, DefaultBacklightDelay);
-    auto backlightEnabledAC     = Get(BacklightEnabledAC, DefaultBacklightEnabledAC) != 0;
-    auto backlightEnabledBAT    = Get(BacklightEnabledBAT, DefaultBacklightEnabledBAT) != 0;
-    auto backlightEnabledBATLow = Get(BacklightEnabledBATLow, DefaultBacklightEnabledBATLow) != 0;
-    auto backlightMinAC         = Get(BacklightMinAC, DefaultBacklightMinAC);
-    auto backlightMinBAT        = Get(BacklightMinBAT, DefaultBacklightMinBAT);
-    auto backlightMinBATLow     = Get(BacklightMinBATLow, DefaultBacklightMinBATLow);
-    auto backlightMaxAC         = Get(BacklightMaxAC, DefaultBacklightMaxAC);
-    auto backlightMaxBAT        = Get(BacklightMaxBAT, DefaultBacklightMaxBAT);
-    auto backlightMaxBATLow     = Get(BacklightMaxBATLow, DefaultBacklightMaxBATLow);
+    auto backlightDelay = Get(BacklightDelay, DefaultBacklightDelay);
     {
         DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
@@ -170,7 +151,57 @@ void Conf::Update()
         backlightScale = std::any_cast<int32_t>(reply.GetArgs().front());
     }
 
-    auto keyboardLedDelay         = Get(KeyboardLedDelay, DefaultKeyboardLedDelay);
+    auto keyboardLedDelay = Get(KeyboardLedDelay, DefaultKeyboardLedDelay);
+    {
+        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
+            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
+            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
+            "keyboardBrightnessMax");
+        DBUS::Reply reply(dBusConnection.Send(methodCall));
+        keyboardLedScale = std::any_cast<int32_t>(reply.GetArgs().front());
+    }
+    loopDelay = std::min(updateDelay, int(sensorDelay));
+    if (backlightEnabled)
+        loopDelay = std::min(loopDelay, int(backlightDelay));
+    if (keyboardLedEnabled)
+        loopDelay = std::min(loopDelay, int(keyboardLedDelay));
+    if (loopDelay == 0)
+        loopDelay = 5000; // Avoid looping infinitely fast...
+
+    if (!confFileExists) {
+        Log() << "Saving config file\n";
+        Save(configPath);
+        std::filesystem::permissions(
+            configPath,
+            std::filesystem::perms::all,
+            std::filesystem::perm_options::add);
+    }
+
+    DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
+        "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+        "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
+        "brightnessMax");
+    DBUS::Reply reply(dBusConnection.Send(methodCall));
+    Set("BacklightScale", std::any_cast<int32_t>(reply.GetArgs().front()));
+    Update();
+}
+
+void Conf::Update()
+{
+    const auto now   = std::chrono::high_resolution_clock::now();
+    const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
+    if (!firstUpdate && delta < updateDelay)
+        return;
+    firstUpdate                   = false;
+    auto backlightEnabledAC       = Get(BacklightEnabledAC, DefaultBacklightEnabledAC) != 0;
+    auto backlightEnabledBAT      = Get(BacklightEnabledBAT, DefaultBacklightEnabledBAT) != 0;
+    auto backlightEnabledBATLow   = Get(BacklightEnabledBATLow, DefaultBacklightEnabledBATLow) != 0;
+    auto backlightMinAC           = Get(BacklightMinAC, DefaultBacklightMinAC);
+    auto backlightMinBAT          = Get(BacklightMinBAT, DefaultBacklightMinBAT);
+    auto backlightMinBATLow       = Get(BacklightMinBATLow, DefaultBacklightMinBATLow);
+    auto backlightMaxAC           = Get(BacklightMaxAC, DefaultBacklightMaxAC);
+    auto backlightMaxBAT          = Get(BacklightMaxBAT, DefaultBacklightMaxBAT);
+    auto backlightMaxBATLow       = Get(BacklightMaxBATLow, DefaultBacklightMaxBATLow);
     auto keyboardLedEnabledAC     = Get(KeyboardLedEnabledAC, DefaultKeyboardLedEnabledAC) != 0;
     auto keyboardLedEnabledBAT    = Get(KeyboardLedEnabledBAT, DefaultKeyboardLedEnabledBAT) != 0;
     auto keyboardLedEnabledBATLow = Get(KeyboardLedEnabledBATLow, DefaultKeyboardLedEnabledBATLow) != 0;
@@ -180,15 +211,6 @@ void Conf::Update()
     auto keyboardLedMaxAC         = Get(KeyboardLedMaxAC, DefaultKeyboardLedMaxAC);
     auto keyboardLedMaxBAT        = Get(KeyboardLedMaxBAT, DefaultKeyboardLedMaxBAT);
     auto keyboardLedMaxBATLow     = Get(KeyboardLedMaxBATLow, DefaultKeyboardLedMaxBATLow);
-    {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
-            "keyboardBrightnessMax");
-        DBUS::Reply reply(dBusConnection.Send(methodCall));
-        keyboardLedScale = std::any_cast<int32_t>(reply.GetArgs().front());
-    }
-
     if (OnBattery()) {
         if (OnLowBattery()) {
             backlightEnabled   = backlightEnabledBATLow;
@@ -212,23 +234,6 @@ void Conf::Update()
         backlightMax       = backlightMaxAC;
         keyboardLedMin     = keyboardLedMinAC;
         keyboardLedMax     = keyboardLedMaxAC;
-    }
-
-    loopDelay = int(sensorDelay);
-    if (backlightEnabled)
-        loopDelay = std::min(loopDelay, int(backlightDelay));
-    if (keyboardLedEnabled)
-        loopDelay = std::min(loopDelay, int(keyboardLedDelay));
-    if (loopDelay == 0)
-        loopDelay = 5000; // Avoid looping infinitely fast...
-
-    if (!confFileExists) {
-        Log() << "Saving config file\n";
-        Save(configPath);
-        std::filesystem::permissions(
-            configPath,
-            std::filesystem::perms::all,
-            std::filesystem::perm_options::add);
     }
 
     lastUpdate = std::chrono::high_resolution_clock::now();

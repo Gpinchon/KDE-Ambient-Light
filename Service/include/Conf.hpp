@@ -25,6 +25,8 @@ public:
     double sensorScale      = 1;
     double sensorOffset     = 0;
     int loopDelay           = 5000;
+    int updateDelay         = 5000;
+    bool firstUpdate        = true;
 
     DBUS::Connection& dBusConnection;
 
