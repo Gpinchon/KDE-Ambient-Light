@@ -18,8 +18,8 @@ int main(int, char const*[])
     KeyboardLed keyboardLed(config);
 
     Log() << "SensorPath : " << config.Get(SensorPath, DefaultSensorPath) << "\n";
-    config.Update();
     while (true) {
+        config.Update();
         sensor.Update();
         auto brightness = sensor.GetBrightness();
         if (config.backlightEnabled != 0) {
