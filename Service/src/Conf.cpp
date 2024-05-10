@@ -236,5 +236,5 @@ void Conf::Update()
         keyboardLedMax     = keyboardLedMaxAC;
     }
 
-    lastUpdate = std::chrono::high_resolution_clock::now();
+    lastUpdate = now;
 }
