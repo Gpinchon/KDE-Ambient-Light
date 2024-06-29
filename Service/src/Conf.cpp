@@ -141,6 +141,7 @@ Conf::Conf(DBUS::Connection& a_DBusConnection)
     std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
     std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
 
+    Get(BacklightTransitionTime, DefaultBacklightTransitionTime);
     auto backlightDelay = Get(BacklightDelay, DefaultBacklightDelay);
     {
         DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",

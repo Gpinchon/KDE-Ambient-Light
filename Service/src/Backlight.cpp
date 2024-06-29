@@ -12,41 +12,46 @@ void Backlight::Update()
     const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
     if (!firstUpdate && delta < conf.Get(BacklightDelay, DefaultBacklightDelay))
         return;
-    int curBrightness = 0;
-
+    double curBrightness = 0;
     {
         DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
             "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
             "brightness");
         DBUS::Reply reply(conf.dBusConnection.Send(methodCall));
-        curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
+        curBrightness = std::any_cast<int32_t>(reply.GetArgs().front()) / conf.backlightScale;
     }
-
-    auto newBrightness = int(brightness * conf.backlightScale);
-    newBrightness      = curBrightness * 0.9f + newBrightness * 0.1f;
+    if (firstUpdate)
+        lastBrightness = curBrightness;
+    auto brightnessTransitionTime = conf.Get(BacklightTransitionTime, DefaultBacklightTransitionTime);
+    auto newBrightnessWeight      = std::min(delta / brightnessTransitionTime, 1.0);
+    auto curBrightnessWeight      = 1 - newBrightnessWeight;
+    auto newBrightness            = lastBrightness * curBrightnessWeight + brightness * newBrightnessWeight;
+    lastUpdate                    = std::chrono::high_resolution_clock::now();
+    lastBrightness                = newBrightness;
     if (curBrightness == newBrightness)
         return;
     {
+        auto newBrightnessInt = int(newBrightness * conf.backlightScale);
         DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
             "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
             "setBrightnessSilent");
-        methodCall.SetArgs(DBUS_TYPE_INT32, &newBrightness);
+        methodCall.SetArgs(DBUS_TYPE_INT32, &newBrightnessInt);
         conf.dBusConnection.Send(methodCall);
     }
     Log() << "Backlight brightness :\n"
           << "Min Brightness   " << conf.backlightMin << "\n"
           << "Max Brightness   " << conf.backlightMax << "\n"
+          << "Brightness       " << brightness
           << "Brightness Scale " << conf.backlightScale << "\n"
-          << "New Brightness   " << newBrightness << "\n"
-          << "Brightness       " << brightness << std::endl;
-    lastUpdate  = std::chrono::high_resolution_clock::now();
+          << "New Brightness   " << (newBrightness * conf.backlightScale) << "\n"
+          << std::endl;
     firstUpdate = false;
 }
 void Backlight::SetBrightness(const double& a_Value)
 {
-    brightness = float(std::clamp(a_Value,
+    brightness = std::clamp(a_Value,
         conf.backlightMin,
-        conf.backlightMax));
+        conf.backlightMax);
 }
