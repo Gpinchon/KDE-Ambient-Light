@@ -21,6 +21,8 @@ DefaultSensorSmoothing = 1.5
 DefaultBacklightEnabled = true
 //Backlight update delay in milliseconds, default update frequency is 30 times/sec
 DefaultBacklightDelay = 32
+//Backlight transition time in milliseconds, default is 5 seconds
+DefaultBacklightTransitionTime = 5000
 //Backlight minimum value on AC
 DefaultBacklightMinAC = 0
 //Backlight minimum value on battery
