@@ -8,6 +8,3 @@ In order to build from source and install the service, simply run ./build_and_in
 ## Dependencies
 ### Service
 cmake, libc-dev, libcxx-dev, libdbus-1-dev, PkgConfig, FindPkgConfig.cmake
-### KCM
-cmake, libc-dev, libcxx-dev, Qt6
-
