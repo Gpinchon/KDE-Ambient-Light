@@ -22,25 +22,21 @@ void KeyboardLed::Update()
         DBUS::Reply reply(conf.dBusConnection.Send(methodCall));
         curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
     }
-
-    auto newBrightness = int(brightness * conf.keyboardLedScale);
-    if (curBrightness == newBrightness)
-        return;
-    {
+    lastUpdate = std::chrono::high_resolution_clock::now();
+    if (auto newBrightness = int(brightness * conf.keyboardLedScale); curBrightness == newBrightness) {
         DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
             "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
             "setKeyboardBrightnessSilent");
         methodCall.SetArgs(DBUS_TYPE_INT32, &newBrightness);
-        conf.dBusConnection.Send(methodCall);
+        conf.dBusConnection.SendNoReply(methodCall);
+        Log() << "Keyboard brightness :\n"
+              << "Min Brightness   " << conf.keyboardLedMin << "\n"
+              << "Max Brightness   " << conf.keyboardLedMax << "\n"
+              << "Brightness Scale " << conf.keyboardLedScale << "\n"
+              << "New Brightness   " << newBrightness << "\n"
+              << "Brightness       " << brightness << std::endl;
     }
-    Log() << "Keyboard brightness :\n"
-          << "Min Brightness   " << conf.keyboardLedMin << "\n"
-          << "Max Brightness   " << conf.keyboardLedMax << "\n"
-          << "Brightness Scale " << conf.keyboardLedScale << "\n"
-          << "New Brightness   " << newBrightness << "\n"
-          << "Brightness       " << brightness << std::endl;
-    lastUpdate  = std::chrono::high_resolution_clock::now();
     firstUpdate = false;
 }
 

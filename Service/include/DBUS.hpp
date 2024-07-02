@@ -1,95 +1,100 @@
 #pragma once
-#include <cstdint>
-#include <utility>
-#include <stdexcept>
 #include <any>
-#include <vector>
+#include <cstdint>
 #include <cstring>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include <dbus/dbus.h>
 namespace DBUS {
-class Exception : public std::exception
-{
+class Exception : public std::exception {
 public:
-    explicit Exception(const std::string &a_Message) : _message("DBUS Exception : " + a_Message) {}
-    const char *what() const noexcept override { return _message.c_str(); };
+    explicit Exception(const std::string& a_Message)
+        : _message("DBUS Exception : " + a_Message)
+    {
+    }
+    const char* what() const noexcept override { return _message.c_str(); };
 
 private:
     const std::string _message;
 };
 
 template <typename T>
-class Object
-{
+class Object {
 public:
-    operator T &() { return data; }
+    operator T&() { return data; }
     T data;
 
 protected:
-    Object(const T &a_Value = {}) : data(a_Value) {}
-};
-
-class Error : public Object<::DBusError>
-{
-public:
-    Error()
+    Object(const T& a_Value = {})
+        : data(a_Value)
     {
-        DBusError &dbus_error = *this;
-        dbus_error_init(&dbus_error);
     }
+    virtual ~Object() = default;
 };
 
-class Connection : public Object<::DBusConnection *>
-{
+class Error : public Object<::DBusError> {
 public:
-    Connection(const DBusBusType &a_Type);
-    ~Connection();
-    ::DBusMessage *Send(::DBusMessage *) const;
+    Error();
+    ~Error() override;
 };
 
-class Message : public Object<::DBusMessage *>
-{
+class Connection : public Object<::DBusConnection*> {
 public:
-    Message(::DBusMessage *a_Msg)
-    : Object(a_Msg)
-    {};
-    ~Message();
+    Connection(const DBusBusType& a_Type);
+    ~Connection() override;
+    [[nodiscard]] ::DBusMessage* Send(::DBusMessage*) const;
+    void SendNoReply(::DBusMessage*) const;
 };
 
-class MethodCall : public Message
-{
+class Message : public Object<::DBusMessage*> {
 public:
-    MethodCall(const char *bus_name,
-                   const char *path,
-                   const char *iface,
-                   const char *method);
+    Message(::DBusMessage* a_Msg)
+        : Object(a_Msg) {};
+    ~Message() override;
+};
+
+class MethodCall : public Message {
+public:
+    MethodCall(const char* bus_name,
+        const char* path,
+        const char* iface,
+        const char* method);
     template <typename... Args>
     void SetArgs(Args... a_Args);
 };
 
-inline ::DBusMessageIter GetMessageIter(DBusMessage* a_Message) {
+inline ::DBusMessageIter GetMessageIter(DBusMessage* a_Message)
+{
     DBusMessageIter iter;
     dbus_message_iter_init(a_Message, &iter);
     return iter;
 }
 
-inline ::DBusMessageIter GetMessageIterEnd() {
+inline ::DBusMessageIter GetMessageIterEnd()
+{
     ::DBusMessageIter iter;
     std::memset(&iter, 1, sizeof(::DBusMessageIter));
     return iter;
 }
 
-class ReplyIterator
-{
+class ReplyIterator {
 public:
-    ReplyIterator(::DBusMessageIter const& a_Iter) : iter(a_Iter) {}
-    bool operator==(const ReplyIterator& a_Other) const {
+    ReplyIterator(::DBusMessageIter const& a_Iter)
+        : iter(a_Iter)
+    {
+    }
+    bool operator==(const ReplyIterator& a_Other) const
+    {
         return std::memcmp(&iter, &a_Other.iter, sizeof(::DBusMessageIter)) == 0;
     }
-    bool operator!=(const ReplyIterator& a_Other) const {
+    bool operator!=(const ReplyIterator& a_Other) const
+    {
         return !(*this == a_Other);
     }
-    auto& operator++() {
+    auto& operator++()
+    {
         if (!dbus_message_iter_next(&iter)) {
             iter = GetMessageIterEnd();
         }
@@ -99,17 +104,20 @@ public:
     ::DBusMessageIter iter;
 };
 
-class Reply : public Message
-{
+class Reply : public Message {
 public:
-    Reply(::DBusMessage *a_Msg) : Message(a_Msg){};
-    auto begin() {
+    Reply(::DBusMessage* a_Msg)
+        : Message(a_Msg) {};
+    auto begin()
+    {
         return ReplyIterator(GetMessageIter(*this));
     }
-    auto end() const {
+    auto end() const
+    {
         return GetMessageIterEnd();
     }
-    std::vector<std::any> GetArgs() {
+    std::vector<std::any> GetArgs()
+    {
         std::vector<std::any> args;
         for (auto arg : *this) {
             args.push_back(arg);
@@ -123,10 +131,9 @@ inline void MethodCall::SetArgs(Args... a_Args)
 {
     Error error;
     dbus_message_append_args(data, a_Args..., DBUS_TYPE_INVALID);
-    if (error.data.message != nullptr)
-    {
+    if (error.data.message != nullptr) {
         throw Exception(std::string(error.data.name) + " : " + error.data.message);
     }
 }
 
-} //namespace DBUS
+} // namespace DBUS
