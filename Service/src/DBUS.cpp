@@ -50,7 +50,7 @@ Connection::~Connection()
 
 void Connection::SendNoReply(::DBusMessage* a_Msg) const
 {
-    Message message = Send(a_Msg);
+    Message { Send(a_Msg) };
 }
 
 Message::~Message()
