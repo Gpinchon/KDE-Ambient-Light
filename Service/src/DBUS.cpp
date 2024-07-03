@@ -50,10 +50,7 @@ Connection::~Connection()
 
 void Connection::SendNoReply(::DBusMessage* a_Msg) const
 {
-    dbus_connection_send(
-        data,
-        a_Msg,
-        nullptr);
+    Message message = Send(a_Msg);
 }
 
 Message::~Message()
