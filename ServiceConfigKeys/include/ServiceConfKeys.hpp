@@ -6,6 +6,7 @@ constexpr auto SensorPath      = "SensorPath";
 constexpr auto SensorDelay     = "SensorDelay";
 constexpr auto SensorSmoothing = "SensorSmoothing";
 
+constexpr auto BacklightPath           = "BacklightPath";
 constexpr auto BacklightDelay          = "BacklightDelay";
 constexpr auto BacklightTransitionTime = "BacklightTransitionTime";
 constexpr auto BacklightEnabledAC      = "BacklightEnabledAC";
@@ -18,6 +19,7 @@ constexpr auto BacklightMaxAC          = "BacklightMaxAC";
 constexpr auto BacklightMaxBAT         = "BacklightMaxBAT";
 constexpr auto BacklightMaxBATLow      = "BacklightMaxBATLow";
 
+constexpr auto KeyboardLedPath          = "KeyboardLedPath";
 constexpr auto KeyboardLedDelay         = "KeyboardLedDelay";
 constexpr auto KeyboardLedEnabledAC     = "KeyboardLedEnabledAC";
 constexpr auto KeyboardLedEnabledBAT    = "KeyboardLedEnabledBAT";
@@ -37,6 +39,7 @@ constexpr auto DefaultSensorPath      = "/sys/bus/iio/devices/iio:device0";
 constexpr auto DefaultSensorDelay     = 500;
 constexpr auto DefaultSensorSmoothing = 1.5;
 
+constexpr auto DefaultBacklightPath           = "/sys/class/backlight/amdgpu_bl1/";
 constexpr auto DefaultBacklightDelay          = 32; // default update frequency is 30 times/sec
 constexpr auto DefaultBacklightTransitionTime = 5000.0;
 constexpr auto DefaultBacklightEnabledAC      = true;
@@ -49,6 +52,7 @@ constexpr auto DefaultBacklightMaxAC          = 1;
 constexpr auto DefaultBacklightMaxBAT         = 1;
 constexpr auto DefaultBacklightMaxBATLow      = 1;
 
+constexpr auto DefaultKeyboardLedPath          = "/sys/class/leds/platform::kbd_backlight";
 constexpr auto DefaultKeyboardLedDelay         = 1000;
 constexpr auto DefaultKeyboardLedEnabledAC     = true;
 constexpr auto DefaultKeyboardLedEnabledBAT    = true;

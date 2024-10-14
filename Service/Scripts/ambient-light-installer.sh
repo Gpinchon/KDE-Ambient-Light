@@ -5,6 +5,8 @@ BINDIR="/usr/bin"
 SERVICEDIR="/etc/systemd/user"
 
 sh ambient-light-uninstaller.sh
+echo "Adding user to video group"
+sudo gpasswd -a $USER video
 echo "Copying ambient-light.service to $SERVICEDIR/ambient-light.service"
 sudo cp "$SOURCE/ambient-light.service" "$SERVICEDIR/ambient-light.service"
 echo "Copying ambient-light to $BINDIR/ambient-light"

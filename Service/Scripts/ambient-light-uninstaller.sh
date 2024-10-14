@@ -16,6 +16,7 @@ if test -f "$BINDIR/ambient-light"; then
     sudo rm "$BINDIR/ambient-light"
     systemctl --user daemon-reload
     echo "Uninstallation done !"
+    echo "Think about removing yourself from the video group if needed"
 else
     echo "Ambient Light Service not installed !"
 fi

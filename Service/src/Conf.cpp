@@ -131,36 +131,24 @@ Conf::Conf(DBUS::Connection& a_DBusConnection)
 
     Get(MaxLuxBreakpoint, DefaultMaxLuxBreakpoint);
 
-    auto sensorPath = Get(SensorPath, std::string(DefaultSensorPath));
+    sensorPath = Get(SensorPath, std::string(DefaultSensorPath));
     if (!SensorPathValid(sensorPath)) {
         Error() << "Invalid sensor path : " << sensorPath << std::endl;
         throw ConfException("Invalid sensor path");
     }
     auto sensorDelay = Get(SensorDelay, DefaultSensorDelay);
     Get(SensorSmoothing, DefaultSensorSmoothing);
-    std::ifstream(sensorPath + "/in_illuminance_scale") >> sensorScale;
-    std::ifstream(sensorPath + "/in_illuminance_offset") >> sensorOffset;
+    std::ifstream(sensorPath / "in_illuminance_scale") >> sensorScale;
+    std::ifstream(sensorPath / "in_illuminance_offset") >> sensorOffset;
 
+    backlightPath = Get(BacklightPath, DefaultBacklightPath);
     Get(BacklightTransitionTime, DefaultBacklightTransitionTime);
     auto backlightDelay = Get(BacklightDelay, DefaultBacklightDelay);
-    {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-            "brightnessMax");
-        DBUS::Reply reply(dBusConnection.Send(methodCall));
-        backlightScale = std::any_cast<int32_t>(reply.GetArgs().front());
-    }
+    std::ifstream(backlightPath / "max_brightness") >> backlightScale;
 
+    keyboardLedPath = Get(KeyboardLedPath, DefaultKeyboardLedPath);
     auto keyboardLedDelay = Get(KeyboardLedDelay, DefaultKeyboardLedDelay);
-    {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
-            "keyboardBrightnessMax");
-        DBUS::Reply reply(dBusConnection.Send(methodCall));
-        keyboardLedScale = std::any_cast<int32_t>(reply.GetArgs().front());
-    }
+    std::ifstream(keyboardLedPath / "max_brightness") >> keyboardLedScale;
     loopDelay = std::min(updateDelay, int(sensorDelay));
     if (backlightEnabled)
         loopDelay = std::min(loopDelay, int(backlightDelay));
@@ -177,13 +165,6 @@ Conf::Conf(DBUS::Connection& a_DBusConnection)
             std::filesystem::perms::all,
             std::filesystem::perm_options::add);
     }
-
-    DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-        "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-        "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-        "brightnessMax");
-    DBUS::Reply reply(dBusConnection.Send(methodCall));
-    Set("BacklightScale", std::any_cast<int32_t>(reply.GetArgs().front()));
     Update();
 }
 

@@ -6,6 +6,14 @@
 
 #include <cmath>
 #include <fstream>
+#include <cassert>
+
+Sensor::Sensor(Conf &a_Conf)
+    : conf(a_Conf)
+    , illuminancePath(conf.sensorPath / "in_illuminance_raw")
+{
+    assert(std::filesystem::exists(illuminancePath));
+}
 
 void Sensor::Update()
 {
@@ -13,8 +21,8 @@ void Sensor::Update()
     const auto delta = std::chrono::duration<double, std::milli>(now - lastUpdate).count();
     if (!firstUpdate && delta < conf.Get(SensorDelay, DefaultSensorDelay))
         return;
-    std::ifstream(conf.Get(SensorPath, DefaultSensorPath) + "/in_illuminance_raw") >> illuminance;
-    Log() << "Get sensor illuminance : " << illuminance << "\n";
+    std::ifstream(illuminancePath) >> illuminance;
+    Log() << "Sensor illuminance " << illuminance << "\n";
     illuminance = illuminance * conf.sensorScale + conf.sensorOffset;
     lastUpdate  = std::chrono::high_resolution_clock::now();
     firstUpdate = false;

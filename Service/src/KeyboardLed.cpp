@@ -5,6 +5,15 @@
 #include <Tools.hpp>
 
 #include <algorithm>
+#include <cassert>
+#include <fstream>
+
+KeyboardLed::KeyboardLed(Conf &a_Conf)
+    : conf(a_Conf)
+    , brightnessPath(conf.keyboardLedPath / "brightness")
+{
+    assert(std::filesystem::exists(brightnessPath));
+}
 
 void KeyboardLed::Update()
 {
@@ -13,23 +22,12 @@ void KeyboardLed::Update()
     if (!firstUpdate && delta < conf.Get(KeyboardLedDelay, DefaultKeyboardLedDelay))
         return;
     int curBrightness = 0;
-
     {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
-            "keyboardBrightness");
-        DBUS::Reply reply(conf.dBusConnection.Send(methodCall));
-        curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
+        std::ifstream(brightnessPath) >> curBrightness;
     }
     lastUpdate = std::chrono::high_resolution_clock::now();
     if (auto newBrightness = int(brightness * conf.keyboardLedScale); curBrightness == newBrightness) {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/KeyboardBrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.KeyboardBrightnessControl",
-            "setKeyboardBrightnessSilent");
-        methodCall.SetArgs(DBUS_TYPE_INT32, &newBrightness);
-        conf.dBusConnection.SendNoReply(methodCall);
+        std::ofstream(brightnessPath) << newBrightness;
         Log() << "Keyboard brightness :\n"
               << "Min Brightness   " << conf.keyboardLedMin << "\n"
               << "Max Brightness   " << conf.keyboardLedMax << "\n"

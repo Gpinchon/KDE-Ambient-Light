@@ -5,6 +5,15 @@
 #include <Tools.hpp>
 
 #include <algorithm>
+#include <fstream>
+#include <cassert>
+
+Backlight::Backlight(Conf& a_Conf)
+    : conf(a_Conf)
+    , brightnessPath(conf.Get(BacklightPath, DefaultBacklightPath) + "brightness")
+{
+    assert(std::filesystem::exists(brightnessPath));
+}
 
 void Backlight::Update()
 {
@@ -14,12 +23,7 @@ void Backlight::Update()
         return;
     int curBrightness = 0;
     {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-            "brightness");
-        DBUS::Reply reply(conf.dBusConnection.Send(methodCall));
-        curBrightness = std::any_cast<int32_t>(reply.GetArgs().front());
+        std::ifstream(brightnessPath) >> curBrightness;
     }
     if (firstUpdate)
         lastBrightness = curBrightness / conf.backlightScale;
@@ -30,17 +34,12 @@ void Backlight::Update()
     lastUpdate                    = std::chrono::high_resolution_clock::now();
     lastBrightness                = newBrightness;
     if (auto newBrightnessInt = int(newBrightness * conf.backlightScale); curBrightness != newBrightnessInt) {
-        DBUS::MethodCall methodCall("org.kde.Solid.PowerManagement",
-            "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-            "org.kde.Solid.PowerManagement.Actions.BrightnessControl",
-            "setBrightnessSilent");
-        methodCall.SetArgs(DBUS_TYPE_INT32, &newBrightnessInt);
-        conf.dBusConnection.SendNoReply(methodCall);
+        std::ofstream(brightnessPath, std::ios_base::trunc) << newBrightnessInt;
         Log() << "Backlight brightness :\n"
               << "Min Brightness   " << conf.backlightMin << "\n"
               << "Max Brightness   " << conf.backlightMax << "\n"
-              << "Brightness       " << brightness
               << "Brightness Scale " << conf.backlightScale << "\n"
+              << "Brightness       " << brightness << "\n"
               << "New Brightness   " << (newBrightness * conf.backlightScale) << "\n"
               << std::endl;
     }
